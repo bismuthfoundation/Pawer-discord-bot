@@ -39,3 +39,39 @@ The team nor the service operator hold no responsability if your wallet or funds
 This meant to be used for tips, thanks you, quick experiments and other small amount usage.  
 The matching wallet private key are stored on a secret online server.
 
+### tip
+*user*
+*amount*
+
+Tip an amount of coins from wallet to another user.  
+Will create the recipient address if it does not exists yet.  
+
+Note: subject to a max tipping constraint to prevent accidental large sum tips.
+
+Ex: `Pawer tip @EggdraSyl 1`
+
+### rain
+*user_count*
+*amount*
+
+Tip the specified number of online users a total amount of coins.  
+BOT accounts are ignored by default.  
+Will create the recipient address if it does not exists yet.  
+
+Note: subject to a max tipping constraint to prevent accidental large sum tips.
+
+Ex: `Pawer rain 10 20` will give 10 random online users 0.5 $BIS each.
+
+### withdraw
+*bismuth_address*
+*amount* or *all*
+
+Send an amount of coins from wallet to a particular address.  
+No confirmation is required.  
+Tx fees are taken from your wallet.  
+When using *all* instead of an amount, yhe total sent will be your balance less the fees.
+
+
+## Hypernodes commands
+
+WIP
