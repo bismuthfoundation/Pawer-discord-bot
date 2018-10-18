@@ -25,6 +25,15 @@ Bounty address:
 
 ## Why that name?
 
+For once, it's a word that was never used on our Discord, making it a valuable candidate for a Bot invocation.
+
+Then, it's in memory of Georgius Agricola (1494-1555), known as the Father of minaralogy.  
+He latinized many German mining and technical words, like "*Bisemutum*" for the Bismuth element, from the German "*Wismuth*".
+
+"Pawer" Was his german birth name. Nowadays, that would be "Bauer" ;)
+
+So, when you'll get some tip, you'll have a thought for Georg Pawer :D
+
 ## Potentially Useful resources
 
 - Discord Python API  
