@@ -9,8 +9,8 @@ import discord
 import requests
 from discord.ext import commands
 
-from modules.config import CONFIG
-from modules.helpers import User, ts_to_string, is_channel
+# from modules.config import CONFIG
+from modules.helpers import User, ts_to_string
 
 """
 Potential todo:
@@ -26,7 +26,6 @@ class Bismuth:
     def __init__(self, bot):
         self.bot = bot
 
-    @is_channel(CONFIG['bot_channel'])
     @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
     async def bismuth(self, ctx):
         # TODO: cache
@@ -42,7 +41,6 @@ class Bismuth:
                                                                                         qtrade['USD']['lastPrice']))
 
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
-    @is_channel(CONFIG['bot_channel'])
     async def deposit(self, ctx):
         user = User(ctx.message.author.id)
         user_info = user.info()
@@ -67,7 +65,6 @@ class Bismuth:
         await self.bot.say(embed=em)
 
     @commands.command(name='accept', brief="Accept the Pawer terms", pass_context=True)
-    @is_channel(CONFIG['bot_channel'])
     async def accept(self, ctx):
         user = User(ctx.message.author.id)
         user_info = user.info()
