@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from os import path, makedirs
 
+import aiohttp
 from discord.ext import commands
 
 from bismuthclient.bismuthwallet import BismuthWallet
@@ -15,7 +16,22 @@ def ts_to_string(timestamp):
     return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 
+async def async_get(url, is_json=False):
+    """Async gets an url content.
+
+    If is_json, decodes the content
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            res = await resp.text()
+            # TODO: could use resp content-type to decide
+            if is_json:
+                res = json.loads(res)
+            return res
+
+
 def is_channel(channel_id):
+    """No more used, kept for history"""
     def predicate(ctx):
         # print("server", ctx.message.server)
         if not ctx.message.server:
