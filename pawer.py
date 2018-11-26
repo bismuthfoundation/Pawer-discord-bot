@@ -45,7 +45,13 @@ async def on_message(message):
         # only here, will process commands
         await client.process_commands(message)
 
+
 # TODO: add generic "info" command
+@client.command(name='info', brief="Pawer bot general info", pass_context=True)
+async def info(ctx):
+    # TODO: cache?
+    await client.say("TODO - info")
+
 
 if __name__ == '__main__':
     client.add_cog(Bismuth(client))
