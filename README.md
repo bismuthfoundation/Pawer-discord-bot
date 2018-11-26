@@ -8,6 +8,8 @@ Collaborative repo for a discord bot to be run on our Bismuth Discord server: ht
 The specs of this bot are a WIP.  
 There probably will be a bounty for a python dev willing to handle the job.
 
+> Update 2018-11-26: On its way, mainly handled by @iyomisc with help from @eggdraSyl
+
 ## Technology
 
 Since Bismuth is a full python, from scratch crypto, Python has to be used for constitency.  
