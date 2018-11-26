@@ -30,9 +30,11 @@ async def on_ready():
 @client.event
 async def on_message(message):
     """Called when a message is created and sent to a server."""
-    if message.content.startswith(BOT_PREFIX):
-        if client.user.id != message.author.id: # check not a bot message
-            print("Got {} from {}".format(message.content, message.author.display_name))
+    if not message.content.startswith(BOT_PREFIX):
+        # Not for us
+        return
+    if client.user.id != message.author.id: # check not a bot message
+        print("Got {} from {}".format(message.content, message.author.display_name))
     if message.server and message.channel.id not in CONFIG['bot_channel']:
         # TODO: blame if Pawer command in non private nor dedicated channel
         # Can PM and auto delete the message also?
