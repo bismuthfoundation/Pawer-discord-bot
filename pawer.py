@@ -1,11 +1,12 @@
-import discord
-import asyncio
-import json
+# import discord
+# import asyncio
+# import json
+from discord.ext import commands
+from cogs.extra import Extra
+from modules.config import CONFIG
 
-with open("config.json", "r") as f:
-    CONFIG = json.load(f)
-
-client = discord.Client()
+# client = discord.Client()
+client = commands.Bot(command_prefix='Pawer ')
 
 @client.event
 async def on_ready():
@@ -20,9 +21,11 @@ async def on_ready():
     print('------')
 
 
+
+"""
 @client.event
 async def on_message(message):
-    """Called when a message is created and sent to a server."""
+    #Called when a message is created and sent to a server.
     if client.user.id != message.author.id: # check not a bot message
         print("Got", message.content)
 
@@ -37,8 +40,9 @@ async def on_message(message):
     elif message.content.startswith('Pawer sleep'):
         await asyncio.sleep(5)
         await client.send_message(message.channel, 'Done sleeping')
-
+"""
 
 if __name__ == '__main__':
 
+    client.add_cog(Extra(client))
     client.run(CONFIG['token'])
