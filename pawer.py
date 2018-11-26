@@ -1,13 +1,19 @@
-# import discord
-# import asyncio
-# import json
+"""
+Pawer Discord Bot for Bismuth Cryptocurrency
+"""
+
 from discord.ext import commands
+
 from cogs.bismuth import Bismuth
 from cogs.extra import Extra
 from modules.config import CONFIG
 
-# client = discord.Client()
-client = commands.Bot(command_prefix='Pawer ')
+__version__ = '0.2'
+
+BOT_PREFIX = "Pawer "
+
+client = commands.Bot(command_prefix=BOT_PREFIX)
+
 
 @client.event
 async def on_ready():
@@ -21,30 +27,10 @@ async def on_ready():
     print(client.user.id)
     print('------')
 
-
-
-"""
-@client.event
-async def on_message(message):
-    #Called when a message is created and sent to a server.
-    if client.user.id != message.author.id: # check not a bot message
-        print("Got", message.content)
-
-    if message.content.startswith('Pawer test'):
-        counter = 0
-        tmp = await client.send_message(message.channel, 'Calculating messages...')
-        async for log in client.logs_from(message.channel, limit=100):
-            if log.author == message.author:
-                counter += 1
-
-        await client.edit_message(tmp, 'You have {} messages.'.format(counter))
-    elif message.content.startswith('Pawer sleep'):
-        await asyncio.sleep(5)
-        await client.send_message(message.channel, 'Done sleeping')
-"""
+# TODO: add generic "info" command
 
 if __name__ == '__main__':
-
     client.add_cog(Bismuth(client))
     client.add_cog(Extra(client))
+
     client.run(CONFIG['token'])

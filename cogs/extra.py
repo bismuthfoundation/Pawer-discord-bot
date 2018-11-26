@@ -1,34 +1,33 @@
 """
-Extra test cogs
+Extra cogs
 """
 
 import requests
-from modules.config import CONFIG
-from modules.helpers import is_channel
 from discord.ext import commands
 
+from modules.config import CONFIG
+from modules.helpers import is_channel
 
 
 class Extra:
-    """Usefull cogs not Bismuth specific"""
+    """Useful cogs not Bismuth specific"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='test', brief="test", pass_context=True)
     @is_channel(CONFIG['bot_channel'])
+    @commands.command(name='test', brief="test", pass_context=True)
     async def test(self, ctx):
         # print(ctx.message.content)
         await self.bot.say('test')
-
 
     @commands.command()
     @is_channel(CONFIG['bot_channel'])
     async def ping(self):
         await self.bot.say('Pong')
 
-    @commands.command(name='bitcoin', brief="Shows bitcoin price")
     @is_channel(CONFIG['bot_channel'])
+    @commands.command(name='bitcoin', brief="Shows bitcoin price")
     async def bitcoin(self, pass_context=True):
         # TODO: cache
         url = 'https://api.coindesk.com/v1/bpi/currentprice/BTC.json'

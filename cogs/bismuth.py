@@ -2,16 +2,22 @@
 Bismuth related cog
 """
 
-""
+import json
+import time
 
 import discord
 import requests
-import time
-from modules.config import CONFIG
 from discord.ext import commands
-from modules.helpers import is_channel, User, ts_to_string
 
+from modules.config import CONFIG
+from modules.helpers import User, ts_to_string, is_channel
 
+"""
+Potential todo:
+    play paper / rock / scissor
+    play zircodice
+    mining rentability calc
+"""
 
 
 class Bismuth:
@@ -29,19 +35,11 @@ class Bismuth:
         cryptopia = response.json()['markets']['Cryptopia']
         qtrade = response.json()['markets']['QTrade']
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
-        await self.bot.say(":bis: price is {:0.8f} BTC or {:0.2f} USD on Cryptopia".format(cryptopia['BTC']['lastPrice'],
-                                                                                         cryptopia['USD']['lastPrice']))
+        await self.bot.say(
+            ":bis: price is {:0.8f} BTC or {:0.2f} USD on Cryptopia".format(cryptopia['BTC']['lastPrice'],
+                                                                            cryptopia['USD']['lastPrice']))
         await self.bot.say(":bis: price is {:0.8f} BTC or {:0.2f} USD on QTrade".format(qtrade['BTC']['lastPrice'],
-                                                                                      qtrade['USD']['lastPrice']))
-
-
-    # play paper / rock / scissor
-    # play zircodice
-    #
-    # mining rentability calc
-
-
-
+                                                                                        qtrade['USD']['lastPrice']))
 
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
     @is_channel(CONFIG['bot_channel'])
@@ -51,9 +49,7 @@ class Bismuth:
         print(ctx.message.author.id, user_info)
         if user_info:
             if user_info['accept']:
-                # await self.bot.say("Your :bis: address is `{}`".format(user_info['address']))
                 msg = "{}, your :bis: address is `{}`".format(ctx.message.author.display_name, user_info['address'])
-                # await self.bot.say(msg)
                 em = discord.Embed(description=msg, colour=discord.Colour.green())
                 await self.bot.say(embed=em)
 
@@ -69,8 +65,6 @@ class Bismuth:
         em = discord.Embed(description=disclaimer, colour=discord.Colour.dark_orange())
         em.set_author(name="Terms:")
         await self.bot.say(embed=em)
-
-
 
     @commands.command(name='accept', brief="Accept the Pawer terms", pass_context=True)
     @is_channel(CONFIG['bot_channel'])
@@ -91,7 +85,6 @@ class Bismuth:
         info = {"accept": int(time.time()), "address": address}
         user.save(info)
         msg = "Your :bis: address is `{}`".format(info['address'])
-        # await self.bot.say(msg)
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
         await self.bot.say(embed=em)
