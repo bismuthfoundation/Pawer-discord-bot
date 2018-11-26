@@ -6,9 +6,10 @@ from discord.ext import commands
 
 from cogs.bismuth import Bismuth
 from cogs.extra import Extra
+from cogs.hypernodes import Hypernodes
 from modules.config import CONFIG
 
-__version__ = '0.21'
+__version__ = '0.3'
 
 BOT_PREFIX = "Pawer "
 
@@ -26,6 +27,7 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+
 
 @client.event
 async def on_message(message):
@@ -47,6 +49,7 @@ async def on_message(message):
 
 if __name__ == '__main__':
     client.add_cog(Bismuth(client))
+    client.add_cog(Hypernodes(client))
     client.add_cog(Extra(client))
 
     client.run(CONFIG['token'])
