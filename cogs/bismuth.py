@@ -4,10 +4,12 @@ Bismuth related cog
 
 ""
 
+import discord
 import requests
+import time
 from modules.config import CONFIG
 from discord.ext import commands
-from modules.helpers import is_channel
+from modules.helpers import is_channel, User, ts_to_string
 
 
 
@@ -31,3 +33,65 @@ class Bismuth:
                                                                                          cryptopia['USD']['lastPrice']))
         await self.bot.say(":bis: price is {:0.8f} BTC or {:0.2f} USD on QTrade".format(qtrade['BTC']['lastPrice'],
                                                                                       qtrade['USD']['lastPrice']))
+
+
+    # play paper / rock / scissor
+    # play zircodice
+    #
+    # mining rentability calc
+
+
+
+
+    @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
+    @is_channel(CONFIG['bot_channel'])
+    async def deposit(self, ctx):
+        user = User(ctx.message.author.id)
+        user_info = user.info()
+        print(ctx.message.author.id, user_info)
+        if user_info:
+            if user_info['accept']:
+                # await self.bot.say("Your :bis: address is `{}`".format(user_info['address']))
+                msg = "{}, your :bis: address is `{}`".format(ctx.message.author.display_name, user_info['address'])
+                # await self.bot.say(msg)
+                em = discord.Embed(description=msg, colour=discord.Colour.green())
+                await self.bot.say(embed=em)
+
+                return
+        disclaimer = """By creating a Bismuth address on this service, you acknowledge that:
+        - This is meant to be used for tips, thanks you, quick experiments and other small amount usage.
+        - The matching wallet private key is stored on a secret online server, team operated.
+        - The team does not hold any responsability if your wallet or funds are lost.
+        Basically, you're using this service at your own risks.
+
+        Type `Pawer accept` to say you understand and proceed."""
+
+        em = discord.Embed(description=disclaimer, colour=discord.Colour.dark_orange())
+        em.set_author(name="Terms:")
+        await self.bot.say(embed=em)
+
+
+
+    @commands.command(name='accept', brief="Accept the Pawer terms", pass_context=True)
+    @is_channel(CONFIG['bot_channel'])
+    async def accept(self, ctx):
+        user = User(ctx.message.author.id)
+        user_info = user.info()
+        # if accepted, say when and gives address
+        if user_info:
+            if user_info['accept']:
+                msg = "Your :bis: address is `{}`".format(user_info['address'])
+                em = discord.Embed(description=msg, colour=discord.Colour.orange())
+                em.set_author(name="{}, you already accepted the terms on {}".
+                              format(ctx.message.author.display_name, ts_to_string(user_info['accept'])))
+                await self.bot.say(embed=em)
+                return
+        # If not, creates wallet and stores accepted.
+        address = user.create_wallet()
+        info = {"accept": int(time.time()), "address": address}
+        user.save(info)
+        msg = "Your :bis: address is `{}`".format(info['address'])
+        # await self.bot.say(msg)
+        em = discord.Embed(description=msg, colour=discord.Colour.green())
+        em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
+        await self.bot.say(embed=em)
