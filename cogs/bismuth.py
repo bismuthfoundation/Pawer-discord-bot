@@ -8,6 +8,7 @@ import time
 import discord
 import requests
 from discord.ext import commands
+from modules.config import EMOJIS
 
 # from modules.config import CONFIG
 from modules.helpers import User, ts_to_string
@@ -34,11 +35,9 @@ class Bismuth:
         cryptopia = response.json()['markets']['Cryptopia']
         qtrade = response.json()['markets']['QTrade']
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
-        await self.bot.say(
-            ":bis: price is {:0.8f} BTC or {:0.2f} USD on Cryptopia".format(cryptopia['BTC']['lastPrice'],
-                                                                            cryptopia['USD']['lastPrice']))
-        await self.bot.say(":bis: price is {:0.8f} BTC or {:0.2f} USD on QTrade".format(qtrade['BTC']['lastPrice'],
-                                                                                        qtrade['USD']['lastPrice']))
+        await self.bot.say("{} price is:\n▸ {:0.8f} BTC or {:0.2f} USD on Cryptopia\n▸ {:0.8f} BTC or {:0.2f} USD on QTrade"
+                           .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
+                                   qtrade['BTC']['lastPrice'],qtrade['USD']['lastPrice']))
 
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
     async def deposit(self, ctx):
@@ -47,7 +46,8 @@ class Bismuth:
         print(ctx.message.author.id, user_info)
         if user_info:
             if user_info['accept']:
-                msg = "{}, your :bis: address is `{}`".format(ctx.message.author.display_name, user_info['address'])
+                msg = "{}, your {} address is `{}`".\
+                    format(ctx.message.author.display_name, EMOJIS['Bismuth'], user_info['address'])
                 em = discord.Embed(description=msg, colour=discord.Colour.green())
                 await self.bot.say(embed=em)
 
@@ -82,7 +82,7 @@ class Bismuth:
         info = {"accept": int(time.time()), "address": address}
         user.save(info)
         # TODO: safety, store an encrypted backup of the wallet elsewhere.
-        msg = "Your :bis: address is `{}`".format(info['address'])
+        msg = "Your {}: address is `{}`".format(EMOJIS['Bismuth'], info['address'])
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
         await self.bot.say(embed=em)

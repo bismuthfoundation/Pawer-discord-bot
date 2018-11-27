@@ -3,13 +3,14 @@ Pawer Discord Bot for Bismuth Cryptocurrency
 """
 
 from discord.ext import commands
+from discord.utils import get
 
 from cogs.bismuth import Bismuth
 from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
-from modules.config import CONFIG
+from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.31'
+__version__ = '0.32'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -24,10 +25,12 @@ async def on_ready():
     Likewise, this function is not guaranteed to only be called once.
     This library implements reconnection logic and thus will end up calling this event whenever a RESUME request fails.
     """
+    global EMOJIS
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
+    EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
 
 
 @client.event

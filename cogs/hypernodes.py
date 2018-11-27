@@ -9,6 +9,7 @@ import discord
 from discord.ext import commands
 from distutils.version import LooseVersion
 from modules.helpers import async_get
+from modules.config import EMOJIS
 
 
 class Hypernodes:
@@ -51,15 +52,15 @@ class Hypernodes:
 
         msg = ("▸ Hypernodes version is {}".format(status['latest_version']),
                "▸ PoS chain height is {}".format(status['latest_height']),
-               "▸ {} Active Hypernodes, {} :bis: total active collateral"
-               .format(status['active'], status['active_collateral']),
-               "▸ Estimated weekly reward for 10K Collateral is {} :bis:".format(per_week_10k),
+               "▸ {} Active Hypernodes, {} {} total active collateral"
+               .format(status['active'], status['active_collateral'], EMOJIS['Bismuth']),
+               "▸ Estimated weekly reward for 10K Collateral is {} {}".format(per_week_10k, EMOJIS['Bismuth']),
                "▸ Estimated yearly ROI {:0.1f}%".format(per_year_30k * 100 / 30000)
                )
         msg = "\n".join(msg)
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{} registered Hypernodes with {} total BIS collateral".
-                      format(status['total'], format(status['collateral'])))
+                      format(status['total'], status['collateral']))
         await self.bot.say(embed=em)
 
     @commands.group(name='hypernode', brief="Hypernode commands", pass_context=True)
