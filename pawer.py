@@ -9,9 +9,10 @@ from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from modules.config import CONFIG
 
-__version__ = '0.3'
+__version__ = '0.31'
 
-BOT_PREFIX = "Pawer "
+# BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
+BOT_PREFIX = 'Pawer '
 
 client = commands.Bot(command_prefix=BOT_PREFIX)
 
@@ -47,10 +48,14 @@ async def on_message(message):
 
 
 # TODO: add generic "info" command
-@client.command(name='info', brief="Pawer bot general info", pass_context=True)
-async def info(ctx):
+@client.command(name='about', brief="Pawer bot general info", pass_context=True)
+async def about(ctx):
     # TODO: cache?
-    await client.say("TODO - info")
+    # version
+    # release logs?
+    # number of wallets, of users, of messages?
+    # other stats frm the bot (sqlite base?)
+    await client.say("Pawer bot Version {}\nI'm your Bismuth butler. Type `Pawer help` for a full commands list.".format(__version__))
 
 
 if __name__ == '__main__':

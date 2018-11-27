@@ -16,18 +16,24 @@ def ts_to_string(timestamp):
     return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 
+HTTP_SESSION = None
+
+
 async def async_get(url, is_json=False):
     """Async gets an url content.
 
     If is_json, decodes the content
     """
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            res = await resp.text()
-            # TODO: could use resp content-type to decide
-            if is_json:
-                res = json.loads(res)
-            return res
+    global HTTP_SESSION
+    if not HTTP_SESSION:
+        HTTP_SESSION = aiohttp.ClientSession()
+    # async with aiohttp.ClientSession() as session:
+    async with HTTP_SESSION.get(url) as resp:
+        if is_json:
+            return await resp.json()
+        else:
+            return await resp.text()
+        # TODO: could use resp content-type to decide
 
 
 def is_channel(channel_id):
