@@ -53,8 +53,8 @@ class Hypernodes:
         msg = ("▸ Hypernodes version is {}".format(status['latest_version']),
                "▸ PoS chain height is {}".format(status['latest_height']),
                "▸ {} Active Hypernodes, {} {} total active collateral"
-               .format(status['active'], status['active_collateral'], EMOJIS['Bismuth']),
-               "▸ Estimated weekly reward for 10K Collateral is {} {}".format(per_week_10k, EMOJIS['Bismuth']),
+               .format(status['active'], status['active_collateral'], '$BIS'),
+               "▸ Estimated weekly reward for 10K Collateral is {} {}".format(per_week_10k, '$BIS'),
                "▸ Estimated yearly ROI {:0.1f}%".format(per_year_30k * 100 / 30000)
                )
         msg = "\n".join(msg)
