@@ -3,6 +3,7 @@ Helpers for the Pawer discord bot
 """
 
 import json
+import sys
 from datetime import datetime
 from os import path, makedirs
 
@@ -10,6 +11,7 @@ import aiohttp
 from discord.ext import commands
 
 from bismuthclient.bismuthwallet import BismuthWallet
+from bismuthclient.bismuthclient import BismuthClient
 
 
 def ts_to_string(timestamp):
@@ -17,6 +19,8 @@ def ts_to_string(timestamp):
 
 
 HTTP_SESSION = None
+
+BISMUTH_CLIENT = None
 
 
 async def async_get(url, is_json=False):
@@ -53,6 +57,7 @@ class User:
     __slots__ = ('_base_path', '_user_id', '_wallet', '_info')
 
     def __init__(self, user_id):
+        global BISMUTH_CLIENT
         self._user_id = user_id
         self._base_path = 'users/{}/{}/{}'.format(user_id[0], user_id[1], user_id)
         # print("self._base_path", self._base_path)
@@ -61,6 +66,10 @@ class User:
             makedirs(base_dir, exist_ok=True)
         self._wallet = None
         self._info = None
+        if not BISMUTH_CLIENT:
+            # Here we can force to use a local, dedicated wallet server
+            # See servers_list
+            BISMUTH_CLIENT = BismuthClient(verbose=True)
 
     @property
     def json_file(self):
@@ -86,6 +95,7 @@ class User:
         return True
 
     def create_wallet(self):
+        # We could simplify this since the BISMUTH_CLIENT has a wallet itself
         # if wallet exists, load
         if path.exists(self.wallet_file):
             self._wallet = BismuthWallet(wallet_file=self.wallet_file, verbose=True)
@@ -97,3 +107,17 @@ class User:
         print("Created", self._wallet.address)
         # send address back
         return self._wallet.address
+
+    def balance(self, token=''):
+        """
+        Returns balance of current wallet.
+        If token is not empty, returns the balance for this specific token
+        """
+        # TODO: this is not async (but if async, should be serialized)
+        BISMUTH_CLIENT.load_wallet(self.wallet_file)
+        return BISMUTH_CLIENT.balance(for_display=True)
+
+    def send_bis_to(self, amount, recipient):
+        BISMUTH_CLIENT.load_wallet(self.wallet_file)
+        txid = BISMUTH_CLIENT.send(recipient, amount)
+        return txid
