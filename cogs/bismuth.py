@@ -20,6 +20,14 @@ Potential todo:
     mining rentability calc
 """
 
+DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge that:
+- This is meant to be used for tips, thanks you, quick experiments and other small amount usage.
+- The matching wallet private key is stored on a secret online server, team operated.
+- The team does not hold any responsability if your wallet or funds are lost.
+Basically, you're using this service at your own risks.
+
+Type `Pawer accept` to say you understand and proceed."""
+
 
 class Bismuth:
     """Bismuth specific Cogs"""
@@ -52,19 +60,78 @@ class Bismuth:
                 await self.bot.say(embed=em)
 
                 return
-        disclaimer = """By creating a Bismuth address on this service, you acknowledge that:
-        - This is meant to be used for tips, thanks you, quick experiments and other small amount usage.
-        - The matching wallet private key is stored on a secret online server, team operated.
-        - The team does not hold any responsability if your wallet or funds are lost.
-        Basically, you're using this service at your own risks.
 
-        Type `Pawer accept` to say you understand and proceed."""
-
-        em = discord.Embed(description=disclaimer, colour=discord.Colour.dark_orange())
+        em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.dark_orange())
         em.set_author(name="Terms:")
         await self.bot.say(embed=em)
 
-    @commands.command(name='accept', brief="Accept the Pawer terms", pass_context=True)
+    @commands.command(name='balance', brief="Displays your current BIS balance", pass_context=True)
+    async def balance(self, ctx, *, type: str=''):
+        # TODO: several types of balance (bis, usd, eur?) or by reactions rather than message ;)
+        user = User(ctx.message.author.id)
+        user_info = user.info()
+        # print(ctx.message.author.id, user_info)
+        if user_info and user_info['address']:
+                # User exists and validated the terms, has an address
+                balance = user.balance()
+                msg = "{}, your balance is {} {}".\
+                    format(ctx.message.author.display_name, balance, EMOJIS['Bismuth'])
+                em = discord.Embed(description=msg, colour=discord.Colour.green())
+                await self.bot.say(embed=em)
+                return
+        em = discord.Embed(description="DISCLAIMER", colour=discord.Colour.red())
+        em.set_author(name="You have to create your address first:")
+        await self.bot.say(embed=em)
+
+    @commands.command(name='tip', brief="Tip a user, default 1 bis, min 0.1, max 50 BIS", pass_context=True)
+    async def tip(self, ctx, who_to_tip: discord.Member, amount: str='1'):
+        try:
+            amount = float(amount)
+            if amount > 50:
+                amount = 50
+            if amount < 0.1:
+                amount = 0.1
+            user = User(ctx.message.author.id)
+            user_info = user.info()
+            # print(ctx.message.author.id, user_info)
+            if user_info and user_info['address']:
+                    # User exists and validated the terms, has an address
+                    # We could get a custom default tip value here from the info
+                    # Make sure balance is enough
+                    balance = float(user.balance())
+                    msg = "{} tip {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                    print(msg)
+                    if balance < amount + 0.01:
+                        print("balance too low")
+                        await self.bot.add_reaction(ctx.message, '😟')
+                        # await self.bot.add_reaction(ctx.message, '⚖️')
+                        return
+                    user_to_tip_info = User(who_to_tip.id).info()
+                    print("to_tip", user_to_tip_info)
+                    if not user_to_tip_info or not user_to_tip_info['address']:
+                        print("user has no wallet")
+                        await self.bot.add_reaction(ctx.message, '🤔')  # Thinking face purse
+                        # await self.bot.add_reaction(ctx.message, '🤔👛')  # Thinking face purse
+                        return
+                    txid = user.send_bis_to(amount, user_to_tip_info['address'])
+                    print("txid", txid)
+                    if txid:
+                        # answer by reaction not to pollute
+                        await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                    else:
+                        await self.bot.add_reaction(ctx.message, '👎')
+                    return
+            # Depending on channel, say or send PM
+            em = discord.Embed(description="DISCLAIMER", colour=discord.Colour.red())
+            em.set_author(name="You have to create your address first:")
+            await self.bot.say(embed=em)
+        except Exception as e:
+            print(str(e))
+            # Send a PM to the sender or answer if dedicated channel
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+
+
+    @commands.command(name='accept', brief="Accept the Pawer terms, run deposit first", pass_context=True)
     async def accept(self, ctx):
         user = User(ctx.message.author.id)
         user_info = user.info()
@@ -85,4 +152,11 @@ class Bismuth:
         msg = "Your {}: address is `{}`".format(EMOJIS['Bismuth'], info['address'])
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
+        await self.bot.say(embed=em)
+
+
+    @commands.command(name='terms', brief="Remind the current Pawer terms of use.", pass_context=True)
+    async def terms(self, ctx):
+        em = discord.Embed(description="DISCLAIMER", colour=discord.Colour.green())
+        em.set_author(name="Current terms of use:")
         await self.bot.say(embed=em)
