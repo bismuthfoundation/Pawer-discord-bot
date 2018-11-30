@@ -10,7 +10,7 @@ from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.32'
+__version__ = '0.4'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -36,12 +36,21 @@ async def on_ready():
 @client.event
 async def on_message(message):
     """Called when a message is created and sent to a server."""
+    if message.content.startswith('pawer '):
+        message.content = message.content.replace('pawer', 'Pawer')
+    if message.content.startswith('!tip'):
+        message.content = message.content.replace('!tip', 'Pawer tip')
+    if message.content.startswith('!Tip'):
+        message.content = message.content.replace('!Tip', 'Pawer tip')
+
     if not message.content.startswith(BOT_PREFIX):
         # Not for us
         return
     if client.user.id != message.author.id: # check not a bot message
         print("Got {} from {}".format(message.content, message.author.display_name))
-    if message.server and message.channel.id not in CONFIG['bot_channel']:
+    if message.server and message.channel.id not in CONFIG['bot_channel'] \
+            and not message.content.startswith('Pawer tip'):
+        # tip is an exception
         # TODO: blame if Pawer command in non private nor dedicated channel
         # Can PM and auto delete the message also?
         print('Unauth channel')
