@@ -79,7 +79,7 @@ class Bismuth:
                 em = discord.Embed(description=msg, colour=discord.Colour.green())
                 await self.bot.say(embed=em)
                 return
-        em = discord.Embed(description="DISCLAIMER", colour=discord.Colour.red())
+        em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
         em.set_author(name="You have to create your address first:")
         await self.bot.say(embed=em)
 
@@ -122,7 +122,7 @@ class Bismuth:
                         await self.bot.add_reaction(ctx.message, '👎')
                     return
             # Depending on channel, say or send PM
-            em = discord.Embed(description="DISCLAIMER", colour=discord.Colour.red())
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
             await self.bot.say(embed=em)
         except Exception as e:
@@ -157,6 +157,6 @@ class Bismuth:
 
     @commands.command(name='terms', brief="Remind the current Pawer terms of use.", pass_context=True)
     async def terms(self, ctx):
-        em = discord.Embed(description="DISCLAIMER", colour=discord.Colour.green())
+        em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.green())
         em.set_author(name="Current terms of use:")
         await self.bot.say(embed=em)
