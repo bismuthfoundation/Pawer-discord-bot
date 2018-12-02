@@ -11,6 +11,7 @@ from modules.config import EMOJIS
 
 # from modules.config import CONFIG
 from modules.helpers import User, ts_to_string, async_get
+from bismuthclient.bismuthutil import BismuthUtil
 
 """
 Potential todo:
@@ -46,16 +47,6 @@ class Bismuth:
                            .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
                                    qtrade['BTC']['lastPrice'],qtrade['USD']['lastPrice']))
 
-    @commands.command(name='info', brief="Shows bismuth chain info", pass_context=True)
-    async def info(self, ctx):
-        # TODO: cache?
-        info = User.status()
-        print(info)
-        msg = "{} info".format(EMOJIS['Bismuth'])
-        em = discord.Embed(description=msg, colour=discord.Colour.green())
-        em.set_author(name="Bismuth PoW chain status:")
-        await self.bot.say(embed=em)
-
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
     async def deposit(self, ctx):
         user = User(ctx.message.author.id)
@@ -72,6 +63,27 @@ class Bismuth:
 
         em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.dark_orange())
         em.set_author(name="Terms:")
+        await self.bot.say(embed=em)
+
+    @commands.command(name='info', brief="Shows bismuth chain info", pass_context=True)
+    async def info(self, ctx):
+        # TODO: cache?
+        status = User.status()
+        # print(status)
+        # How to
+        msg = "Current supply: {} {}\n".format(int(status['supply']), EMOJIS['Bismuth'])
+        msg += "Block height  : {} \n".format(status['blocks'])
+        msg += "Protocol      : {} \n".format(status['protocolversion'])
+        msg += "Node version  : {} \n".format(status['walletversion'])
+        msg += "Consensus     : {}  ({:0.2f}%)\n".format(status['consensus'], status['consensus_percent'])
+        msg += "Difficulty    : {} \n".format(status['difficulty'])
+        msg += "Connections   : {} \n".format(status['connections'])
+        # msg += "Time of info  : {} \n".format(status['difficulty'])
+        if 'extended' in status:
+            msg += "Wallet version: {} \n".format(status['extended']['version'])
+        em = discord.Embed(description=msg, colour=discord.Colour.green())
+        em.set_author(name="Bismuth PoW status from {} on {} UTC".format(status['server'], ts_to_string(
+            float(status['server_timestamp']))))
         await self.bot.say(embed=em)
 
     @commands.command(name='balance', brief="Displays your current BIS balance", pass_context=True)
@@ -139,6 +151,50 @@ class Bismuth:
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
 
+    @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)
+    async def withdraw(self, ctx, address:str, amount: str, message: str=''):
+        try:
+            amount = float(amount)
+            user = User(ctx.message.author.id)
+            user_info = user.info()
+            # Check the address looks ok
+            if not BismuthUtil.valid_address(address):
+                print("address error")
+                await self.bot.add_reaction(ctx.message, '😟')
+                await self.bot.say("Address does not look ok. Command is `Pawer withdraw <address> <amount> [message]`")
+                return
+
+            if user_info and user_info['address']:
+                # User exists and validated the terms, has an address
+                # Make sure balance is enough
+                balance = float(user.balance())
+                msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                fees = BismuthUtil.fee_for_tx(message)
+                print(msg)
+                if balance < amount + 0.01:
+                    print("balance too low")
+                    await self.bot.add_reaction(ctx.message, '😟')
+                    await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
+                    return
+                txid = user.send_bis_to(amount, address, data=message)
+                print("txid", txid)
+                if txid:
+                    # answer by reaction not to pollute
+                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                    await self.bot.say("Done, txid is {}.".format(txid))
+                else:
+                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+                await self.bot.say("Error")
+                return
+            # Depending on channel, say or send PM
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
+            em.set_author(name="You have to create your address first:")
+            await self.bot.say(embed=em)
+        except Exception as e:
+            print(str(e))
+            # Send a PM to the sender or answer if dedicated channel
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+            await self.bot.say("Error {}".format(e))
 
     @commands.command(name='accept', brief="Accept the Pawer terms, run deposit first", pass_context=True)
     async def accept(self, ctx):
