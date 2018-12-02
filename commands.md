@@ -50,7 +50,7 @@ Note: subject to a max tipping constraint to prevent accidental large sum tips.
 
 Ex: `Pawer tip @EggdraSyl 1`
 
-### rain
+### rain - WIP
 *user_count*
 *amount*
 
@@ -62,9 +62,14 @@ Note: subject to a max tipping constraint to prevent accidental large sum tips.
 
 Ex: `Pawer rain 10 20` will give 10 random online users 0.5 $BIS each.
 
+> **Not functional yet**
+
 ### withdraw
 *bismuth_address*
 *amount* or *all*
+*optional message (data)*
+
+> all does **not** work yet
 
 Send an amount of coins from wallet to a particular address.  
 No confirmation is required.  
