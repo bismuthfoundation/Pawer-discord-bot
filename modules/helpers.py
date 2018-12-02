@@ -12,7 +12,7 @@ from discord.ext import commands
 
 from bismuthclient.bismuthwallet import BismuthWallet
 from bismuthclient.bismuthclient import BismuthClient
-from bismuthclient.bismuthformat import height_to_supply
+from bismuthclient.bismuthutil import BismuthUtil
 
 
 def ts_to_string(timestamp):
@@ -21,7 +21,7 @@ def ts_to_string(timestamp):
 
 HTTP_SESSION = None
 
-BISMUTH_CLIENT = None
+BISMUTH_CLIENT =  BismuthClient(verbose=True)
 
 
 async def async_get(url, is_json=False):
@@ -124,12 +124,13 @@ class User:
         status = BISMUTH_CLIENT.status()
         try:
             status['server'] = BISMUTH_CLIENT.current_server
-            status['supply'] = height_to_supply(status['blocks'])
+            status['supply'] = BismuthUtil.height_to_supply(status['blocks'])
         except:
             pass
         return status
 
     def send_bis_to(self, amount, recipient, data='', operation=''):
+        """Sends BIS from current wallet to recipient, with optional data and operation"""
         BISMUTH_CLIENT.load_wallet(self.wallet_file)
         txid = BISMUTH_CLIENT.send(recipient, amount, data=data, operation=operation)
         return txid
