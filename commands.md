@@ -57,7 +57,7 @@ This meant to be used for tips, thanks you, quick experiments and other small am
 The matching wallet private key are stored on a secret online server.
 
 ### tip
-*user*
+*user*  
 *optional amount (default 1)*
 
 Tip an amount of coins from wallet to another user.  
@@ -68,7 +68,7 @@ Note: subject to a max tipping constraint to prevent accidental large sum tips.
 Ex: `Pawer tip @EggdraSyl 1`
 
 ### rain - WIP
-*user_count*
+*user_count*  
 *amount*
 
 Tip the specified number of online users a total amount of coins.  
@@ -82,8 +82,8 @@ Ex: `Pawer rain 10 20` will give 10 random online users 0.5 $BIS each.
 > **Not functional yet**
 
 ### withdraw
-*bismuth_address*
-*amount* or *all*
+*bismuth_address*  
+*amount* or *all*  
 *optional message (data)*
 
 > all does **not** work yet
@@ -91,7 +91,7 @@ Ex: `Pawer rain 10 20` will give 10 random online users 0.5 $BIS each.
 Send an amount of coins from wallet to a particular address.  
 No confirmation is required.  
 Tx fees are taken from your wallet.  
-When using *all* instead of an amount, yhe total sent will be your balance less the fees.
+When using *all* instead of an amount, the total sent will be your balance less the fees.
 
 Ex: `Pawer withdraw 3b7fc45dfb30a95b0277ed0e5fe0244460827f59f08b8f0b9e7da66e 10`
 Ex: `Pawer withdraw 3b7fc45dfb30a95b0277ed0e5fe0244460827f59f08b8f0b9e7da66e 10 gift`
