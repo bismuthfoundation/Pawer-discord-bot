@@ -2,5 +2,5 @@
 
 while :
 do
-    python pawer.py
+    python3 pawer.py
 done
