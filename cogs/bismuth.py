@@ -39,7 +39,7 @@ class Bismuth:
     async def bismuth(self, ctx):
         # TODO: cache
         url = 'https://bismuth.ciperyho.eu/api/markets'
-        response = async_get(url, is_json=True)
+        response = await async_get(url, is_json=True)
         cryptopia = response['markets']['Cryptopia']
         qtrade = response['markets']['QTrade']
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
