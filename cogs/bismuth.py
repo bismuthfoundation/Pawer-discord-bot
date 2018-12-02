@@ -214,7 +214,7 @@ class Bismuth:
         info = {"accept": int(time.time()), "address": address}
         user.save(info)
         # TODO: safety, store an encrypted backup of the wallet elsewhere.
-        msg = "Your {}: address is `{}`".format(EMOJIS['Bismuth'], info['address'])
+        msg = "Your {} address is `{}`".format(EMOJIS['Bismuth'], info['address'])
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
         await self.bot.say(embed=em)
