@@ -10,7 +10,7 @@ from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -48,15 +48,21 @@ async def on_message(message):
         return
     if client.user.id != message.author.id: # check not a bot message
         print("Got {} from {}".format(message.content, message.author.display_name))
-    if message.server and message.channel.id not in CONFIG['bot_channel'] \
-            and not message.content.startswith('Pawer tip'):
-        # tip is an exception
+    if message.content.startswith('Pawer tip'):
+        # Exception
+        await client.process_commands(message)
+        return
+    if message.server and message.channel.id not in CONFIG['bot_channel']:
         # TODO: blame if Pawer command in non private nor dedicated channel
         # Can PM and auto delete the message also?
         print('Unauth channel')
     else:
-        # only here, will process commands
-        await client.process_commands(message)
+        await client.add_reaction(message, '⏳')  # Hourglass
+        try:
+            # only here, will process commands
+            await client.process_commands(message)
+        finally:
+            await client.remove_reaction(message, '⏳', client.user)  # Hourglass
 
 
 # TODO: add generic "info" command

@@ -12,6 +12,7 @@ from discord.ext import commands
 
 from bismuthclient.bismuthwallet import BismuthWallet
 from bismuthclient.bismuthclient import BismuthClient
+from bismuthclient.bismuthformat import height_to_supply
 
 
 def ts_to_string(timestamp):
@@ -117,7 +118,18 @@ class User:
         BISMUTH_CLIENT.load_wallet(self.wallet_file)
         return BISMUTH_CLIENT.balance(for_display=True)
 
-    def send_bis_to(self, amount, recipient):
+    @staticmethod
+    def status():
+        """Get Bismuth chain status from the server"""
+        status = BISMUTH_CLIENT.status()
+        try:
+            status['server'] = BISMUTH_CLIENT.current_server
+            status['supply'] = height_to_supply(status['blocks'])
+        except:
+            pass
+        return status
+
+    def send_bis_to(self, amount, recipient, data='', operation=''):
         BISMUTH_CLIENT.load_wallet(self.wallet_file)
-        txid = BISMUTH_CLIENT.send(recipient, amount)
+        txid = BISMUTH_CLIENT.send(recipient, amount, data=data, operation=operation)
         return txid

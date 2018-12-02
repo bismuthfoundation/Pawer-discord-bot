@@ -6,12 +6,11 @@ import json
 import time
 
 import discord
-import requests
 from discord.ext import commands
 from modules.config import EMOJIS
 
 # from modules.config import CONFIG
-from modules.helpers import User, ts_to_string
+from modules.helpers import User, ts_to_string, async_get
 
 """
 Potential todo:
@@ -39,13 +38,23 @@ class Bismuth:
     async def bismuth(self, ctx):
         # TODO: cache
         url = 'https://bismuth.ciperyho.eu/api/markets'
-        response = requests.get(url)
-        cryptopia = response.json()['markets']['Cryptopia']
-        qtrade = response.json()['markets']['QTrade']
+        response = async_get(url, is_json=True)
+        cryptopia = response['markets']['Cryptopia']
+        qtrade = response['markets']['QTrade']
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
         await self.bot.say("{} price is:\n▸ {:0.8f} BTC or {:0.2f} USD on Cryptopia\n▸ {:0.8f} BTC or {:0.2f} USD on QTrade"
                            .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
                                    qtrade['BTC']['lastPrice'],qtrade['USD']['lastPrice']))
+
+    @commands.command(name='info', brief="Shows bismuth chain info", pass_context=True)
+    async def info(self, ctx):
+        # TODO: cache?
+        info = User.status()
+        print(info)
+        msg = "{} info".format(EMOJIS['Bismuth'])
+        em = discord.Embed(description=msg, colour=discord.Colour.green())
+        em.set_author(name="Bismuth PoW chain status:")
+        await self.bot.say(embed=em)
 
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
     async def deposit(self, ctx):
