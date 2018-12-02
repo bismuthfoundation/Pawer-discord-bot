@@ -184,7 +184,7 @@ class Bismuth:
                     await self.bot.say("Done, txid is {}.".format(txid))
                 else:
                     await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                await self.bot.say("Error")
+                    await self.bot.say("Error")
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
