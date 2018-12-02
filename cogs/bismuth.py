@@ -225,3 +225,24 @@ class Bismuth:
         em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.green())
         em.set_author(name="Current terms of use:")
         await self.bot.say(embed=em)
+
+    @commands.command(name='terms', brief="Remind the current Pawer terms of use.", pass_context=True)
+    async def terms(self, ctx):
+        em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.green())
+        em.set_author(name="Current terms of use:")
+        await self.bot.say(embed=em)
+
+    @commands.command(name='graph', brief="Shows bismuth graphs: pools, diff, blocktime", pass_context=True)
+    async def graph(self, ctx, type=''):
+        urls = {'pools': ["Bismuth Pools estimated hashrate", 'https://hypernodes.bismuth.live/plots/hr.php'],
+                'diff': ["Mainnet difficulty evolution", 'https://hypernodes.bismuth.live/plots/mainnet/diff.php'],
+                'blocktime': ["Mainnnet blocktime evolution", 'https://hypernodes.bismuth.live/plots/mainnet/blocktime.php']}
+        if type not in urls:
+            msg = "\n".join(["`{}`: {}".format(a,b[0]) for a,b in urls.items()])
+            em = discord.Embed(description=msg, colour=discord.Colour.red())
+            em.set_author(name="Error: Please specify a graph type")
+            await self.bot.say(embed=em)
+        em = discord.Embed()
+        em.set_image(url=urls[type][1])
+        em.set_author(name=urls[type][0])
+        await self.bot.say(embed=em)
