@@ -132,7 +132,12 @@ class Bismuth:
                     if not user_to_tip_info or not user_to_tip_info['address']:
                         print("user has no wallet")
                         await self.bot.add_reaction(ctx.message, '🤔')  # Thinking face purse
-                        # await self.bot.add_reaction(ctx.message, '🤔👛')  # Thinking face purse
+                        message = "Hi {}, {} wanted to tip you, but you do not have a Discord Bismuth wallet yet.\n"\
+                                  .format(who_to_tip.display_name, ctx.message.author.display_name)
+                        message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
+                        message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
+                        message += "Use `Pawer help` to get a full list of what I can do."
+                        await self.bot.send_message(who_to_tip, message)
                         return
                     txid = user.send_bis_to(amount, user_to_tip_info['address'])
                     print("txid", txid)
