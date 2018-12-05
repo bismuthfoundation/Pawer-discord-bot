@@ -130,7 +130,6 @@ class Hypernodes:
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-
     @hypernode.command(name='unwatch', brief="WIP - Removes an HN from the watch list", pass_context=True)
     async def unwatch(self, ctx, hypernode: str=''):
         """Adds a hn to watch, print the current list"""

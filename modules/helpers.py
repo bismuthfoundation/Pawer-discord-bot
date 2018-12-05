@@ -130,8 +130,28 @@ class User:
             pass
         return status
 
-    def send_bis_to(self, amount, recipient, data='', operation=''):
-        """Sends BIS from current wallet to recipient, with optional data and operation"""
-        BISMUTH_CLIENT.load_wallet(self.wallet_file)
-        txid = BISMUTH_CLIENT.send(recipient, amount, data=data, operation=operation)
-        return txid
+    def send_bis_to(self, amount, recipient, data='', operation='', check_balance=False):
+        """
+        Sends BIS from current wallet to recipient, with optional data and operation
+
+        If check_balance, checks the user balance is enough.
+
+        Returns a dict with keys txid (txid if sudccess or None) and error ('', 'NO_WALLET','LOW_BALANCE','MP_INSERT')
+        """
+        error = ''
+        txid = None
+        if path.isfile(self.wallet_file):
+            BISMUTH_CLIENT.load_wallet(self.wallet_file)
+            if check_balance:
+                balance = BISMUTH_CLIENT.balance(for_display=True)
+                fees = BismuthUtil.fee_for_tx(data)
+                if balance < amount + fees:
+                    # TODO: better use an enum
+                    error = 'LOW_BALANCE'
+                    return {'txid': txid, 'error': error}
+            txid = BISMUTH_CLIENT.send(recipient, amount, data=data, operation=operation)
+            if not txid:
+                error = 'MP_INSERT'
+        else:
+            error = 'NO_WALLET'
+        return {'txid': txid, 'error':error}

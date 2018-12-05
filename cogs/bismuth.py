@@ -139,7 +139,8 @@ class Bismuth:
                         message += "Use `Pawer help` to get a full list of what I can do."
                         await self.bot.send_message(who_to_tip, message)
                         return
-                    txid = user.send_bis_to(amount, user_to_tip_info['address'])
+                    send = user.send_bis_to(amount, user_to_tip_info['address'])
+                    txid = send['txid']
                     print("txid", txid)
                     if txid:
                         # answer by reaction not to pollute
@@ -185,7 +186,8 @@ class Bismuth:
                     await self.bot.add_reaction(ctx.message, '😟')
                     await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
-                txid = user.send_bis_to(amount, address, data=message)
+                send = user.send_bis_to(amount, address, data=message)
+                txid = send['txif']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
@@ -193,7 +195,7 @@ class Bismuth:
                     await self.bot.say("Done, txid is {}.".format(txid))
                 else:
                     await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Error")
+                    await self.bot.say("Error {}".format(send['error']))
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
