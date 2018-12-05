@@ -144,6 +144,10 @@ class Bismuth:
                     if txid:
                         # answer by reaction not to pollute
                         await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                        message = "Yeah! You've been tipped {:0.2f} {} by {} ({}) from the Bismuth discord!"\
+                                  .format(amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
+                        await self.bot.send_message(who_to_tip, message)
+
                     else:
                         await self.bot.add_reaction(ctx.message, '👎')
                     return

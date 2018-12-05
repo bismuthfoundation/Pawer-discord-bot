@@ -30,6 +30,7 @@ async def async_get(url, is_json=False):
     If is_json, decodes the content
     """
     global HTTP_SESSION
+    # TODO: retry on error?
     if not HTTP_SESSION:
         HTTP_SESSION = aiohttp.ClientSession()
     # async with aiohttp.ClientSession() as session:

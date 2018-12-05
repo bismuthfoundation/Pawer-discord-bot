@@ -10,7 +10,7 @@ from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.5'
+__version__ = '0.51'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '

@@ -71,9 +71,9 @@ Ex: `Pawer tip @EggdraSyl 1`
 *user_count*  
 *amount*
 
-Tip the specified number of online users a total amount of coins.  
+Tips the specified number of online users a total amount of coins.  
 BOT accounts are ignored by default.  
-Will create the recipient address if it does not exists yet.  
+Will **not** create the recipient address if it does not exists yet.  
 
 Note: subject to a max tipping constraint to prevent accidental large sum tips.
 
@@ -86,9 +86,7 @@ Ex: `Pawer rain 10 20` will give 10 random online users 0.5 $BIS each.
 *amount* or *all*  
 *optional message (data)*
 
-> all does **not** work yet
-
-Send an amount of coins from wallet to a particular address.  
+Sends an amount of coins from wallet to a particular address.  
 No confirmation is required.  
 Tx fees are taken from your wallet.  
 When using *all* instead of an amount, the total sent will be your balance less the fees.
@@ -105,4 +103,33 @@ Ex: `Pawer terms`
 
 ## Hypernodes commands
 
-WIP
+### hypernodes
+
+Overview of the main hypernodes metrics.
+
+Ex: `Pawer hypernodes`
+
+### hypernode watch
+[*ip*]
+
+> **Not functional yet**
+
+Adds an hypernode ip to watch.  
+If this hypernode goes inactive, you'll get a DM.
+
+You can watch several hypernodes by issuing several watch commands.  
+Hypernode has to be registered and active to be watched.
+
+Without an ip, shows the list of currently watching hypernodes.
+
+Ex: `Pawer hypernode watch 1.2.3.4`  
+Ex: `Pawer hypernode watch`
+
+### hypernode unwatch
+*ip*
+
+> **Not functional yet**
+
+Removes an hypernode ip to watch.  
+
+Ex: `Pawer hypernode unwatch 1.2.3.4`
