@@ -8,9 +8,10 @@ from discord.utils import get
 from cogs.bismuth import Bismuth
 from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
-from modules.config import CONFIG, EMOJIS
+from cogs.dragginator import Dragginator
+from modules.config import CONFIG  # , EMOJIS
 
-__version__ = '0.51'
+__version__ = '0.52'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -65,7 +66,6 @@ async def on_message(message):
             await client.remove_reaction(message, '⏳', client.user)  # Hourglass
 
 
-# TODO: add generic "info" command
 @client.command(name='about', brief="Pawer bot general info", pass_context=True)
 async def about(ctx):
     # TODO: cache?
@@ -79,6 +79,7 @@ async def about(ctx):
 if __name__ == '__main__':
     client.add_cog(Bismuth(client))
     client.add_cog(Hypernodes(client))
+    client.add_cog(Dragginator(client))
     client.add_cog(Extra(client))
 
     client.run(CONFIG['token'])
