@@ -95,7 +95,8 @@ class Hypernodes:
             return '\n'.join(["{} height {}".format(s[0], s[1]) for s in hn_height])
         return hn_height
 
-    @hypernode.command(name='watch', brief="WIP - Add an HN to the watch list and warn via PM when down", pass_context=True)
+
+    # @hypernode.command(name='watch', brief="WIP - Add an HN to the watch list and warn via PM when down", pass_context=True)
     async def watch(self, ctx, hypernode: str=''):
         """Adds a hn to watch, print the current list"""
         try:
@@ -130,7 +131,7 @@ class Hypernodes:
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-    @hypernode.command(name='unwatch', brief="WIP - Removes an HN from the watch list", pass_context=True)
+    # @hypernode.command(name='unwatch', brief="WIP - Removes an HN from the watch list", pass_context=True)
     async def unwatch(self, ctx, hypernode: str=''):
         """Adds a hn to watch, print the current list"""
         user = User(ctx.message.author.id)

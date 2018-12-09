@@ -143,9 +143,9 @@ class User:
         if path.isfile(self.wallet_file):
             BISMUTH_CLIENT.load_wallet(self.wallet_file)
             if check_balance:
-                balance = BISMUTH_CLIENT.balance(for_display=True)
+                balance = BISMUTH_CLIENT.balance(for_display=False)
                 fees = BismuthUtil.fee_for_tx(data)
-                if balance < amount + fees:
+                if float(balance) < float(amount) + fees:
                     # TODO: better use an enum
                     error = 'LOW_BALANCE'
                     return {'txid': txid, 'error': error}

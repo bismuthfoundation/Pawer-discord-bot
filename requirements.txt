@@ -1,4 +1,4 @@
 aiohttp
 discord.py
 requests
-BismuthClient
+BismuthClient>=0.0.27
