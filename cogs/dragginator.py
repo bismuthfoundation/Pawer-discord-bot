@@ -53,8 +53,8 @@ class Dragginator:
         elif data[0]:
             msg = "The word is {}\n".format(data[1])
             if float(user.balance()) >= 0.01:
-                txid = user.send_bis_to(0, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf", data=data[1])
-                msg += "txid: {}".format(txid)
+                result = user.send_bis_to(0, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf", data=data[1])
+                msg += "txid: {}".format(result['txid'])
             else:
                 msg += "Not enough Bis to afford the fees ;("
         else:

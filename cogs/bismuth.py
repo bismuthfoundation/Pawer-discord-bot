@@ -187,7 +187,7 @@ class Bismuth:
                     await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
                 send = user.send_bis_to(amount, address, data=message)
-                txid = send['txif']
+                txid = send['txid']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
