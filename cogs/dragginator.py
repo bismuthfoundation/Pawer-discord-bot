@@ -68,7 +68,7 @@ class Dragginator:
         """Buy an egg with Bis"""
         user = User(ctx.message.author.id)
         user_info = user.info()
-        result = user.send_bis_to(2, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf", check_balance=True)
+        result = user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf", check_balance=True)
         if result["txid"]:
             em = discord.Embed(description="Your egg is generating...\n Txid: {}".format(result["txid"]),
                                colour=discord.Colour.green())
