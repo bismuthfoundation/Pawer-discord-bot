@@ -2,6 +2,8 @@
 Pawer Discord Bot for Bismuth Cryptocurrency
 """
 
+import asyncio
+
 from discord.ext import commands
 from discord.utils import get
 
@@ -11,7 +13,7 @@ from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.52'
+__version__ = '0.52b'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -76,10 +78,24 @@ async def about(ctx):
     await client.say("Pawer bot Version {}\nI'm your Bismuth butler. Type `Pawer help` for a full commands list.".format(__version__))
 
 
+async def background_task(cog_list):
+    await client.wait_until_ready()
+    while not client.is_closed:
+        for cog in cog_list:
+            try:
+                await cog.background_task()
+            except:
+                pass
+        await asyncio.sleep(60)
+
+
 if __name__ == '__main__':
     client.add_cog(Bismuth(client))
     client.add_cog(Hypernodes(client))
-    client.add_cog(Dragginator(client))
     client.add_cog(Extra(client))
+    dragg = Dragginator(client)
+    client.add_cog(dragg)
+
+    client.loop.create_task(background_task([dragg]))
 
     client.run(CONFIG['token'])

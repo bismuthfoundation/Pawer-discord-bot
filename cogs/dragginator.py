@@ -7,9 +7,19 @@ Dragginator related cog
 import discord
 from discord.ext import commands
 from modules.helpers import User, async_get
+from cogs.bismuth import get_users_from_addresses
 
 # Current Draggon Egg price in BIS
 EGG_PRICE = 2
+
+
+def _get_from_servers(bot, getter, argument):
+    result = None
+    for server in bot.servers:
+        result = getattr(server, getter)(argument)
+        if result:
+            return result
+    return result
 
 
 class Dragginator:
@@ -84,5 +94,19 @@ class Dragginator:
         em.set_author(name="Get an egg with Bis")
         await self.bot.say(embed=em)
 
+    async def background_task(self):
+        # TODO
+        return
+
+        result = await get_users_from_addresses(['b938135d497bcb40f88622378b5701df0709838443fae66665dc1ac4'])
+        print(result)
+
+        member = _get_from_servers(self.bot, 'get_member_named', 'SySy#5290')
+
+        await self.bot.send_message(member, 'boop')
+
+
+
     # badges (empty or address)
+
 

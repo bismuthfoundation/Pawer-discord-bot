@@ -4,6 +4,7 @@ Bismuth related cog
 
 import json
 import time
+from os import path, walk
 
 import discord
 from discord.ext import commands
@@ -27,6 +28,26 @@ DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge t
 Basically, you're using this service at your own risks.
 
 Type `Pawer accept` to say you understand and proceed."""
+
+
+async def get_users_from_addresses(addresses: list):
+    """
+    Given a list of addresses, returns a list of user ids
+    No reverse index for now, takes times, don't abuse.
+    """
+    result = {}
+    for folder, subs, files in walk("users"):
+            for filename in files:
+                if folder != 'users' and filename.endswith('.json'):
+                    try:
+                        wallet = path.join(folder, filename)
+                        with open(wallet, 'r') as f:
+                            info = json.load(f)
+                            if info['address'] in addresses:
+                                result[info['address']] = filename[:-5]
+                    except:
+                        pass
+    return result
 
 
 class Bismuth:
