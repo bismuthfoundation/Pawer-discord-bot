@@ -13,7 +13,7 @@ from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.52b'
+__version__ = '0.53'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
