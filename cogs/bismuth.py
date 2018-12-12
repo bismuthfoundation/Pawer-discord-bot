@@ -275,6 +275,81 @@ class Bismuth:
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
             await self.bot.say("Error {}".format(e))
 
+    @commands.command(name='bisurl', brief="Decode a transaction from a BIS URL. Append SEND to effectively send the tx.", pass_context=True)
+    async def bisurl(self, ctx, bisurl: str, send: str='NO'):
+        # TODO: too much code in common with withdraw, factorize somehow.
+        try:
+            try:
+                decode = BismuthUtil.read_url(bisurl)
+            except Exception as e:
+                await self.bot.add_reaction(ctx.message, '😢')  # Crying
+                await self.bot.say("Does not look like a proper BIS URL")
+                return
+            amount = float(decode['amount'])
+            address = decode['recipient']
+            operation = decode['operation']
+            message = decode['openfield']
+            fees = BismuthUtil.fee_for_tx(message)
+
+            decoded = "▸ Recipient: {}\n".format(address)
+            decoded += "▸ Amount: {:.2f} $BIS\n".format(amount)
+            decoded += "▸ Operation: {}\n".format(operation)
+            decoded += "▸ Message: {}\n".format(message)
+            decoded += "▸ Fees: {} $BIS\n".format(fees)
+            if send == 'SEND':
+                title = "Decoded BIS URL:"
+                em = discord.Embed(description=decoded, colour=discord.Colour.green())
+                em.set_author(name=title)
+                await self.bot.say(embed=em)
+            else:
+                title = "Decoded BIS URL: (**not** sent)"
+                decoded += " \nPaste this command again and append ` SEND` if you want to send that transaction.\n"
+                em = discord.Embed(description=decoded, colour=discord.Colour.green())
+                em.set_author(name=title)
+                await self.bot.say(embed=em)
+                return
+
+            user = User(ctx.message.author.id)
+            user_info = user.info()
+            # Check the address looks ok
+            if not BismuthUtil.valid_address(decode['recipient']):
+                print("address error")
+                await self.bot.add_reaction(ctx.message, '😟')
+                await self.bot.say("Address does not look ok. Command is `Pawer operation <operation> <address> <amount> [message]`")
+                return
+
+            if user_info and user_info['address']:
+                # User exists and validated the terms, has an address
+                # Make sure balance is enough
+                balance = float(user.balance())
+                msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                fees = BismuthUtil.fee_for_tx(message)
+                print(msg)
+                if balance < amount + 0.01:
+                    print("balance too low")
+                    await self.bot.add_reaction(ctx.message, '😟')
+                    await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
+                    return
+                send = user.send_bis_to(amount, address, data=message, operation=operation)
+                txid = send['txid']
+                print("txid", txid)
+                if txid:
+                    # answer by reaction not to pollute
+                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                    await self.bot.say("Done, txid is {}.".format(txid))
+                else:
+                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+                    await self.bot.say("Error {}".format(send['error']))
+                return
+            # Depending on channel, say or send PM
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
+            em.set_author(name="You have to create your address first:")
+            await self.bot.say(embed=em)
+        except Exception as e:
+            print(str(e))
+            # Send a PM to the sender or answer if dedicated channel
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+            await self.bot.say("Error {}".format(e))
 
     @commands.command(name='accept', brief="Accept the Pawer terms, run deposit first", pass_context=True)
     async def accept(self, ctx):
