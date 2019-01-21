@@ -13,7 +13,7 @@ from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.53'
+__version__ = '0.54'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -95,6 +95,7 @@ if __name__ == '__main__':
     client.add_cog(Extra(client))
     dragg = Dragginator(client)
     client.add_cog(dragg)
+    client.add_cog(Autogame(client))
 
     client.loop.create_task(background_task([dragg]))
 
