@@ -11,6 +11,7 @@ from cogs.bismuth import Bismuth
 from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
+from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
 
 __version__ = '0.54'
