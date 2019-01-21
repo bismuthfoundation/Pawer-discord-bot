@@ -32,6 +32,8 @@ class Autogame:
         # await self.bot.say("Eggs of {}".format(address))
         hashes = await async_get("http://autogame.bismuth.live:6060/api/seed/{}".format(address), is_json=True)
         msg = ""
+        if hashes is None or len(hashes) == 0:
+            msg = 'You are not registered to any game yet :('
         for hash in hashes:
             info = await async_get("http://autogame.bismuth.live:6060/api/db/{}".format(hash), is_json=True)
             try:
@@ -53,6 +55,7 @@ class Autogame:
         """Register for a tournament"""
         user = User(ctx.message.author.id)
         # user_info = user.info()
+        amount = float(amount)
 
         msg = ''
         if float(user.balance()) >= float(amount) + 0.01:
@@ -68,9 +71,10 @@ class Autogame:
     async def payreg(self, ctx, who_to_reg: discord.Member, league: str='tournament1', amount: str='0'):
         """Register for a tournament"""
         user = User(ctx.message.author.id)
+        amount = float(amount)
         # user_info = user.info()
         msg = ''
-        if float(user.balance()) <= float(amount) + 0.01:
+        if float(user.balance()) <= amount + 0.01:
             msg += "Not enough Bis to afford the fees ;("
             em = discord.Embed(description=msg, colour=discord.Colour.green())
             em.set_author(name="Autogame registration")
