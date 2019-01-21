@@ -68,7 +68,7 @@ class Autogame:
         await self.bot.say(embed=em)
 
     @autogame.command(name='payreg', brief="Pay yourself to register another user to a league, with an optional amount - Amount has to match the league entry ticket.", pass_context=True)
-    async def payreg(self, ctx, who_to_reg: discord.Member, league: str='tournament1', amount: str='0'):
+    async def payreg(self, ctx, who_to_reg: discord.Member, league: str='tournament2', amount: str='0'):
         """Register for a tournament"""
         user = User(ctx.message.author.id)
         amount = float(amount)
