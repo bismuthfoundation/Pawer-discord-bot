@@ -56,8 +56,8 @@ class Bismuth:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
-    async def bismuth(self, ctx):
+
+    async def bismuth_deprecated(self, ctx):
         # TODO: cache
         url = 'https://bismuth.ciperyho.eu/api/markets'
         response = await async_get(url, is_json=True)
@@ -67,6 +67,26 @@ class Bismuth:
         await self.bot.say("{} price is:\n▸ {:0.8f} BTC or {:0.2f} USD on Cryptopia\n▸ {:0.8f} BTC or {:0.2f} USD on QTrade"
                            .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
                                    qtrade['BTC']['lastPrice'],qtrade['USD']['lastPrice']))
+
+
+    @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
+    async def bismuth(self, ctx):
+        MARKETS = ["qtrade", "vinex"]  # Markets we want to list
+        # TODO: cache
+        url = "https://api.coingecko.com/api/v3/coins/bismuth/tickers"
+        api = await async_get(url, is_json=True)
+        prices = []
+        for market in api["tickers"]:
+            if market["market"]["identifier"] in MARKETS:
+                if market["target"] == "BTC":
+                    prices.append("▸ {:0.8f} BTC or {:0.2f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
+        prices = "\n".join(prices)
+        # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
+        await self.bot.say("{} price is:\n{}".format(EMOJIS['Bismuth'], prices))
+
+
+
+
 
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
     async def deposit(self, ctx):
