@@ -155,3 +155,19 @@ class User:
         else:
             error = 'NO_WALLET'
         return {'txid': txid, 'error':error}
+
+    def sign_message(self, data):
+        """
+        Sign message with privkey, for off chain usage
+        Returns a string with b64 encoded signature.
+        """
+        error = ''
+        sign = None
+        if path.isfile(self.wallet_file):
+            BISMUTH_CLIENT.load_wallet(self.wallet_file)
+            sign = BISMUTH_CLIENT.sign(data)
+            if not sign:
+                error = 'ERR_SIGN'
+        else:
+            error = 'NO_WALLET'
+        return {'sign': sign, 'error':error}
