@@ -56,6 +56,11 @@ class Bismuth:
     def __init__(self, bot):
         self.bot = bot
 
+    async def safe_send_message(self, recipient, message):
+        try:
+            await self.bot.send_message(recipient, message)
+        except Exception as e:
+            print(e)
 
     async def bismuth_deprecated(self, ctx):
         # TODO: cache
@@ -67,7 +72,6 @@ class Bismuth:
         await self.bot.say("{} price is:\n▸ {:0.8f} BTC or {:0.2f} USD on Cryptopia\n▸ {:0.8f} BTC or {:0.2f} USD on QTrade"
                            .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
                                    qtrade['BTC']['lastPrice'],qtrade['USD']['lastPrice']))
-
 
     @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
     async def bismuth(self, ctx):
@@ -87,7 +91,6 @@ class Bismuth:
         prices = "\n".join(prices)
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
         await self.bot.say("{} price is:\n{}".format(EMOJIS['Bismuth'], prices))
-
 
     @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
     async def deposit(self, ctx):
@@ -179,7 +182,7 @@ class Bismuth:
                     message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
                     message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
                     message += "Use `Pawer help` to get a full list of what I can do."
-                    await self.bot.send_message(who_to_tip, message)
+                    await self.safe_send_message(who_to_tip, message)
                     return
                 send = user.send_bis_to(amount, user_to_tip_info['address'])
                 txid = send['txid']
@@ -189,7 +192,7 @@ class Bismuth:
                     await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
                     message = "Yeah! You've been tipped {:0.2f} {} by {} ({}) from the Bismuth discord!"\
                               .format(amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
-                    await self.bot.send_message(who_to_tip, message)
+                    await self.safe_send_message(who_to_tip, message)
 
                 else:
                     await self.bot.add_reaction(ctx.message, '👎')
@@ -208,12 +211,12 @@ class Bismuth:
         try:
             total_amount = float(total_amount)
             how_many_users = int(how_many_users)
-            
+
             if how_many_users > 100:
                 how_many_users = 100
             if how_many_users < 1:
                 how_many_users = 1
-            
+
             if total_amount > 1000:
                 total_amount = 1000
             if total_amount < 0.1 * how_many_users:
@@ -254,7 +257,7 @@ class Bismuth:
                 for current_member in registered_members[:how_many_real_users]:
                     user.send_bis_to(individual_amount, User(current_member.id).info()['address'])
                     final_message += current_member.mention + " "
-                    await self.bot.send_message(current_member, message)
+                    await self.safe_send_message(current_member, message)
                 await self.bot.say(final_message)
                 await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
 
@@ -264,7 +267,7 @@ class Bismuth:
                     message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
                     message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
                     message += "Use `Pawer help` to get a full list of what I can do."
-                    await self.bot.send_message(current_member, message)
+                    await self.safe_send_message(current_member, message)
 
                 return
 
@@ -276,8 +279,8 @@ class Bismuth:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-    
-    
+
+
     @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)
     async def withdraw(self, ctx, address:str, amount: str, message: str=''):
         try:
@@ -474,7 +477,7 @@ class Bismuth:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Error {}".format(e)) 
+            await self.bot.say("Error {}".format(e))
 
     @commands.command(name='accept', brief="Accept the Pawer terms, run deposit first", pass_context=True)
     async def accept(self, ctx):

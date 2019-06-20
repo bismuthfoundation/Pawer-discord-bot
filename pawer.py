@@ -14,7 +14,7 @@ from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
 
-__version__ = '0.57'
+__version__ = '0.58'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
