@@ -71,16 +71,17 @@ Ex: `Pawer tip @EggdraSyl 1`
 *total_amount*
 *user_count*
 
-Tips a total amount of coins to the specified number of online users.
+Tips a total amount of coins to the specified number of random online users.
 BOT accounts are ignored by default.  
 Will **not** create the recipient address if it does not exists yet.  
+Users that could be selected but do not have their wallet activated will get a PM, but no BIS.
 
 Notes:
 - subject to a max tipping constraint to prevent accidental large sum tips: total_amount <= 1000
 - at minimum 0.1 bis per user
 - 1 <= user_count <= 100
 
-by default:
+By default:
 - total_amount = 10
 - user_count = 10
 
