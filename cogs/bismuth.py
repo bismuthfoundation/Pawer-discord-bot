@@ -13,7 +13,7 @@ from modules.config import EMOJIS
 # from modules.config import CONFIG
 from modules.helpers import User, ts_to_string, async_get
 from bismuthclient.bismuthutil import BismuthUtil
-
+from random import shuffle
 """
 Potential todo:
     play paper / rock / scissor
@@ -158,42 +158,42 @@ class Bismuth:
             user_info = user.info()
             # print(ctx.message.author.id, user_info)
             if user_info and user_info['address']:
-                    # User exists and validated the terms, has an address
-                    # We could get a custom default tip value here from the info
-                    # Make sure balance is enough
-                    balance = float(user.balance())
-                    msg = "{} tip {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
-                    print(msg)
-                    if balance < amount + 0.01:
-                        print("balance too low")
-                        await self.bot.add_reaction(ctx.message, '😟')
-                        # await self.bot.add_reaction(ctx.message, '⚖️')
-                        return
-                    user_to_tip_info = User(who_to_tip.id).info()
-                    print("to_tip", user_to_tip_info)
-                    if not user_to_tip_info or not user_to_tip_info['address']:
-                        print("user has no wallet")
-                        await self.bot.add_reaction(ctx.message, '🤔')  # Thinking face purse
-                        message = "Hi {}, {} wanted to tip you, but you do not have a Discord Bismuth wallet yet.\n"\
-                                  .format(who_to_tip.display_name, ctx.message.author.display_name)
-                        message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
-                        message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
-                        message += "Use `Pawer help` to get a full list of what I can do."
-                        await self.bot.send_message(who_to_tip, message)
-                        return
-                    send = user.send_bis_to(amount, user_to_tip_info['address'])
-                    txid = send['txid']
-                    print("txid", txid)
-                    if txid:
-                        # answer by reaction not to pollute
-                        await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                        message = "Yeah! You've been tipped {:0.2f} {} by {} ({}) from the Bismuth discord!"\
-                                  .format(amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
-                        await self.bot.send_message(who_to_tip, message)
-
-                    else:
-                        await self.bot.add_reaction(ctx.message, '👎')
+                # User exists and validated the terms, has an address
+                # We could get a custom default tip value here from the info
+                # Make sure balance is enough
+                balance = float(user.balance())
+                msg = "{} tip {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                print(msg)
+                if balance < amount + 0.01:
+                    print("balance too low")
+                    await self.bot.add_reaction(ctx.message, '😟')
+                    # await self.bot.add_reaction(ctx.message, '⚖️')
                     return
+                user_to_tip_info = User(who_to_tip.id).info()
+                print("to_tip", user_to_tip_info)
+                if not user_to_tip_info or not user_to_tip_info['address']:
+                    print("user has no wallet")
+                    await self.bot.add_reaction(ctx.message, '🤔')  # Thinking face purse
+                    message = "Hi {}, {} wanted to tip you, but you do not have a Discord Bismuth wallet yet.\n"\
+                              .format(who_to_tip.display_name, ctx.message.author.display_name)
+                    message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
+                    message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
+                    message += "Use `Pawer help` to get a full list of what I can do."
+                    await self.bot.send_message(who_to_tip, message)
+                    return
+                send = user.send_bis_to(amount, user_to_tip_info['address'])
+                txid = send['txid']
+                print("txid", txid)
+                if txid:
+                    # answer by reaction not to pollute
+                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                    message = "Yeah! You've been tipped {:0.2f} {} by {} ({}) from the Bismuth discord!"\
+                              .format(amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
+                    await self.bot.send_message(who_to_tip, message)
+
+                else:
+                    await self.bot.add_reaction(ctx.message, '👎')
+                return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
@@ -203,6 +203,82 @@ class Bismuth:
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
 
+    @commands.command(name='rain', brief="share a given amount between n users", pass_context=True)
+    async def rain(self, ctx, how_many_users:str='10', total_amount: str='10'):
+        try:
+            total_amount = float(total_amount)
+            how_many_users = float(how_many_users)
+            
+            if how_many_users > 100:
+                how_many_users = 100
+            if how_many_users < 1:
+                how_many_users = 1
+            
+            if total_amount > 1000:
+                total_amount = 1000
+            if total_amount < 0.1*how_many_users:
+                total_amount = 0.1*how_many_users
+
+            user = User(ctx.message.author.id)
+
+            user_info = user.info()
+            # print(ctx.message.author.id, user_info)
+            if user_info and user_info['address']:
+                balance = float(user.balance())
+                msg = "{} rain {} bis to {} users, balance is {} ".format(ctx.message.author.display_name, total_amount,
+                                                                          how_many_users, balance)
+                print(msg)
+                if balance < total_amount + 0.01 * how_many_users:
+                    print("balance too low")
+                    await self.bot.add_reaction(ctx.message, '😟')
+
+                    return
+
+
+                registered_members = []
+                unregistered_members = []
+                for member in self.bot.get_all_members():
+                    if str(member.status) != "offline" and not member.bot:
+                        print(member.name, member.status, member.bot)
+                        current_user = User(member.id)
+                        user_info = current_user.info()
+                        if user_info and user_info["address"]:
+                            registered_members.append(member)
+                        else:
+                            unregistered_members.append(member)
+
+                how_many_users = int(min(how_many_users, len(registered_members)))
+                shuffle(registered_members)
+                shuffle(unregistered_members)
+
+                for current_member in unregistered_members[:10]:
+                    message = "Hi {}, {} launched a rain, but you do not have a Discord Bismuth wallet yet.\n" \
+                        .format(current_member.display_name, ctx.message.author.display_name)
+                    message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
+                    message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
+                    message += "Use `Pawer help` to get a full list of what I can do."
+                    await self.bot.send_message(current_member, message)
+                message = "Yeah! You got {:0.2f} {} from the rain of {} ({}) from the Bismuth discord!" \
+                    .format(total_amount / how_many_users, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
+                final_message = "{:0.2f} {} have been sent to: ".format(total_amount / how_many_users, EMOJIS['Bismuth'])
+                for current_member in registered_members[:how_many_users]:
+                    user.send_bis_to(total_amount / how_many_users, User(current_member.id).info()['address'])
+                    final_message += current_member.mention+" "
+                    await self.bot.send_message(current_member, message)
+                await self.bot.say(final_message)
+                await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                return
+
+            # Depending on channel, say or send PM
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
+            em.set_author(name="You have to create your address first:")
+            await self.bot.say(embed=em)
+        except Exception as e:
+            print(str(e))
+            # Send a PM to the sender or answer if dedicated channel
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+    
+    
     @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)
     async def withdraw(self, ctx, address:str, amount: str, message: str=''):
         try:
