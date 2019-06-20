@@ -67,19 +67,24 @@ Note: subject to a max tipping constraint to prevent accidental large sum tips.
 
 Ex: `Pawer tip @EggdraSyl 1`
 
-### rain - WIP
-*user_count*  
-*amount*
+### rain
+*total_amount*
+*user_count*
 
-Tips the specified number of online users a total amount of coins.  
+Tips a total amount of coins to the specified number of online users.
 BOT accounts are ignored by default.  
 Will **not** create the recipient address if it does not exists yet.  
 
-Note: subject to a max tipping constraint to prevent accidental large sum tips.
+Notes:
+- subject to a max tipping constraint to prevent accidental large sum tips: total_amount <= 1000
+- at minimum 0.1 bis per user
+- 1 <= user_count <= 100
 
-Ex: `Pawer rain 10 20` will give 10 random online users 0.5 $BIS each.
+by default:
+- total_amount = 10
+- user_count = 10
 
-> **Not functional yet**
+Ex: `Pawer rain 10 20` will give 20 random online users 0.5 $BIS each.
 
 ### withdraw
 *bismuth_address*  
