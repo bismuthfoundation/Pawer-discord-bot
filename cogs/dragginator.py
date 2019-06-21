@@ -151,7 +151,7 @@ class Dragginator:
         em.set_author(name="Advent calendar")
         await self.bot.say(embed=em)
 
-    @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users", pass_context=True)
+    @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users (cost 3 bis per user)", pass_context=True)
     async def eggrain(self, ctx, how_many_users: str = '5'):
         try:
             how_many_users = int(how_many_users)
@@ -191,7 +191,7 @@ class Dragginator:
 
                 message = "Yeah! You got a draggon egg from the rain of {} ({}) from the Bismuth discord!" \
                     .format(ctx.message.author, ctx.message.author.display_name)
-                final_message = "{} sent an draggon egg to: ".format(ctx.message.author.mention)
+                final_message = "{} sent a draggon egg to: ".format(ctx.message.author.mention)
 
                 for current_member in registered_members[:how_many_real_users]:
                     user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf",
