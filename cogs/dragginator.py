@@ -151,7 +151,7 @@ class Dragginator:
         em.set_author(name="Advent calendar")
         await self.bot.say(embed=em)
 
-    @commands.command(name='eggrain', brief="Distribute a given amount of eggs between n users", pass_context=True)
+    @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users", pass_context=True)
     async def eggrain(self, ctx, how_many_users: str = '5'):
         try:
             how_many_users = int(how_many_users)
