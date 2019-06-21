@@ -280,7 +280,9 @@ class Bismuth:
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down@commands.command(name='rain', brief="Distribute a given amount between n users", pass_context=True)
+
+
 
 
     @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)

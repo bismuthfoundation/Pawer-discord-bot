@@ -13,7 +13,7 @@ from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
-
+from modules.helpers import User
 __version__ = '0.58'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
@@ -67,12 +67,29 @@ async def on_message(message):
         # Can PM and auto delete the message also?
         print('Unauth channel')
     else:
+        if message.content.startswith('Pawer eligibility'):
+            await elegibility(message)
+            return
         await client.add_reaction(message, '⏳')  # Hourglass
         try:
             # only here, will process commands
             await client.process_commands(message)
         finally:
             await client.remove_reaction(message, '⏳', client.user)  # Hourglass
+
+
+async def elegibility(message):
+    try:
+        registered_members = 0
+        for member in client.get_all_members():
+            if str(member.status) != "offline" and not member.bot:
+                current_user = User(member.id)
+                user_info = current_user.info()
+                if user_info and user_info["address"]:
+                    registered_members += 1
+        await client.send_message(message.channel, "{} users are connected and have a pawer account".format(registered_members))
+    except Exception as e:
+        print(str(e))
 
 
 @client.command(name='about', brief="Pawer bot general info", pass_context=True)
