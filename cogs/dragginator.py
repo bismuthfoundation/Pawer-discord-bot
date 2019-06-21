@@ -10,10 +10,16 @@ import json
 from discord.ext import commands
 from modules.helpers import User, async_get
 from cogs.bismuth import get_users_from_addresses
-
+from random import shuffle
 # Current Draggon Egg price in BIS
-EGG_PRICE = 2
+EGG_PRICE = 3
+DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge that:
+- This is meant to be used for tips, thanks you, quick experiments and other small amount usage.
+- The matching wallet private key is stored on a secret online server, team operated.
+- The team does not hold any responsability if your wallet or funds are lost.
+Basically, you're using this service at your own risks.
 
+Type `Pawer accept` to say you understand and proceed."""
 
 def _get_from_servers(bot, getter, argument):
     result = None
@@ -30,8 +36,17 @@ class Dragginator:
     def __init__(self, bot):
         self.bot = bot
         self.background_count = 15
+        if not os.path.exists("data"):
+            os.system("mkdir data")
+
         if not os.path.exists("data/dragginator.json"):
             open("data/dragginator.json", "w").write('{"last_day":""}')
+
+    async def safe_send_message(self, recipient, message):
+        try:
+            await self.bot.send_message(recipient, message)
+        except Exception as e:
+            print(e)
 
     @commands.group(name='dragg', brief="Dragginator commands", pass_context=True)
     async def dragg(self, ctx):
@@ -135,6 +150,76 @@ class Dragginator:
         em = discord.Embed(description=msg, colour=colour)
         em.set_author(name="Advent calendar")
         await self.bot.say(embed=em)
+
+    @commands.command(name='eggrain', brief="Distribute a given amount of eggs between n users", pass_context=True)
+    async def eggrain(self, ctx, how_many_users: str = '5'):
+        try:
+            how_many_users = int(how_many_users)
+
+            if how_many_users > 100:
+                how_many_users = 100
+            if how_many_users < 1:
+                how_many_users = 1
+
+            user = User(ctx.message.author.id)
+            user_info = user.info()
+            if user_info and user_info['address']:
+                balance = float(user.balance())
+                msg = "{} rain {} eggs to {} users, balance is {} ".format(ctx.message.author.display_name, how_many_users,
+                                                                          how_many_users, balance)
+                print(msg)
+                if balance < how_many_users * (EGG_PRICE + 0.011):
+                    print("balance too low")
+                    await self.bot.add_reaction(ctx.message, '😟')
+                    return
+
+                registered_members = []
+                unregistered_members = []
+                for member in self.bot.get_all_members():
+                    if str(member.status) != "offline" and not member.bot and member.name != ctx.message.author.name:
+                        # print(member.name, member.status, member.bot)
+                        current_user = User(member.id)
+                        user_info = current_user.info()
+                        if user_info and user_info["address"]:
+                            registered_members.append(member)
+                        else:
+                            unregistered_members.append(member)
+
+                how_many_real_users = (min(how_many_users, len(registered_members)))
+                shuffle(registered_members)
+                shuffle(unregistered_members)
+
+                message = "Yeah! You got a draggon egg from the rain of {} ({}) from the Bismuth discord!" \
+                    .format(ctx.message.author, ctx.message.author.display_name)
+                final_message = "{} sent an draggon egg to: ".format(ctx.message.author.mention)
+
+                for current_member in registered_members[:how_many_real_users]:
+                    user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf",
+                                     operation="dragg:gift", data=User(current_member.id).info()['address'])
+                    final_message += current_member.mention + " "
+                    await self.safe_send_message(current_member, message)
+                await self.bot.say(final_message)
+                await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+
+                for current_member in unregistered_members[:10]:
+                    message = "Hi {}, {} launched a draggon eggs rain, but you do not have a Discord Bismuth wallet yet.\n" \
+                        .format(current_member.display_name, ctx.message.author.display_name)
+                    message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
+                    message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
+                    message += "Use `Pawer help` to get a full list of what I can do."
+                    await self.safe_send_message(current_member, message)
+
+                return
+
+            # Depending on channel, say or send PM
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
+            em.set_author(name="You have to create your address first:")
+            await self.bot.say(embed=em)
+        except Exception as e:
+            print(str(e))
+            # Send a PM to the sender or answer if dedicated channel
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+
 
     async def background_task(self):
         # Only run every 15 min

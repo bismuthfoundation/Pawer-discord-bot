@@ -155,6 +155,8 @@ class Bismuth:
             amount = float(amount)
             if amount > 50:
                 amount = 50
+                await self.bot.say("Maw tip amount too high, lowering to 50 {}".format(EMOJIS['Bismuth']))
+
             if amount < 0.1:
                 amount = 0.1
             user = User(ctx.message.author.id)
@@ -220,7 +222,7 @@ class Bismuth:
             if total_amount > 1000:
                 total_amount = 1000
             if total_amount < 0.1 * how_many_users:
-                total_amount = 0.1 * how_many_users
+                how_many_users = int(total_amount/0.1)
             individual_amount = total_amount/how_many_users
             user = User(ctx.message.author.id)
 
@@ -238,8 +240,8 @@ class Bismuth:
                 registered_members = []
                 unregistered_members = []
                 for member in self.bot.get_all_members():
-                    if str(member.status) != "offline" and not member.bot:
-                        print(member.name, member.status, member.bot)
+                    if str(member.status) != "offline" and not member.bot and member.name != ctx.message.author.name:
+                        #print(member.name, member.status, member.bot)
                         current_user = User(member.id)
                         user_info = current_user.info()
                         if user_info and user_info["address"]:
@@ -253,7 +255,7 @@ class Bismuth:
 
                 message = "Yeah! You got {:0.2f} {} from the rain of {} ({}) from the Bismuth discord!" \
                     .format(individual_amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
-                final_message = "{:0.2f} {} each have been sent to: ".format(individual_amount, EMOJIS['Bismuth'])
+                final_message = "{} sent {:0.2f} {} each to: ".format(ctx.message.author.mention, individual_amount, EMOJIS['Bismuth'])
                 for current_member in registered_members[:how_many_real_users]:
                     user.send_bis_to(individual_amount, User(current_member.id).info()['address'])
                     final_message += current_member.mention + " "
