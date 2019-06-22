@@ -2,7 +2,7 @@ import sqlite3
 import json
 
 
-db = sqlite3.connect("../data/stats.db")
+db = sqlite3.connect("data/stats.db")
 cursor = db.cursor()
 
 data = {}
@@ -46,5 +46,5 @@ cursor.execute("select sum(amount), count(amount),  id from tips join users wher
 tips = cursor.fetchall()
 data["eggrain"]["to"] = tips
 
-with open("../data/tips.json", "w") as f:
+with open("data/tips.json", "w") as f:
     json.dump(data, f)
