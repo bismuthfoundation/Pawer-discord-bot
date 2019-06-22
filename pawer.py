@@ -35,7 +35,7 @@ async def on_ready():
     print(client.user.id)
     print('------')
     EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
-    await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands didn't got an answer, just resend it.")
+    await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands didn't get an answer, just resend it.")
 
 
 
@@ -72,6 +72,9 @@ async def on_message(message):
         if message.content.startswith('Pawer eligibility'):
             await elegibility(message)
             return
+        if message.content.startswith('Pawer users'):
+            await user_count(message)
+            return
         await client.add_reaction(message, '⏳')  # Hourglass
         try:
             # only here, will process commands
@@ -90,6 +93,18 @@ async def elegibility(message):
                 if user_info and user_info["address"]:
                     registered_members += 1
         await client.send_message(message.channel, "{} users are connected and have a pawer account".format(registered_members))
+    except Exception as e:
+        print(str(e))
+async def user_count(message):
+    try:
+        registered_members = 0
+        for member in client.get_all_members():
+            if not member.bot:
+                current_user = User(member.id)
+                user_info = current_user.info()
+                if user_info and user_info["address"]:
+                    registered_members += 1
+        await client.send_message(message.channel, "{} users have a pawer account".format(registered_members))
     except Exception as e:
         print(str(e))
 
