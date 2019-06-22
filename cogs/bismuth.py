@@ -265,7 +265,7 @@ class Bismuth:
                 for current_member in registered_members[:how_many_real_users]:
                     to_address = User(current_member.id).info()['address']
                     user.send_bis_to(individual_amount, to_address)
-                    self.bot.tip_module.tip(user_info['address'], user_info['address'], individual_amount, "rain")
+                    self.bot.tip_module.tip(user_info['address'], to_address, individual_amount, "rain")
                     final_message += current_member.mention + " "
                     await self.safe_send_message(current_member, message)
                 await self.bot.say(final_message)
