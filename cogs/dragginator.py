@@ -179,8 +179,8 @@ class Dragginator:
                     if str(member.status) != "offline" and not member.bot and member.name != ctx.message.author.name:
                         # print(member.name, member.status, member.bot)
                         current_user = User(member.id)
-                        user_info = current_user.info()
-                        if user_info and user_info["address"]:
+                        member_info = current_user.info()
+                        if member_info and member_info["address"]:
                             registered_members.append(member)
                         else:
                             unregistered_members.append(member)
@@ -196,6 +196,7 @@ class Dragginator:
                 for current_member in registered_members[:how_many_real_users]:
                     user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf",
                                      operation="dragg:gift", data=User(current_member.id).info()['address'])
+                    self.bot.tip_module.tip(user_info['address'], user_info['address'], 1, "eggrain")
                     final_message += current_member.mention + " "
                     await self.safe_send_message(current_member, message)
                 await self.bot.say(final_message)

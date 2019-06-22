@@ -14,6 +14,7 @@ from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
 from modules.helpers import User
+from modules.stats import Tips
 __version__ = '0.58'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
@@ -95,6 +96,8 @@ async def elegibility(message):
         await client.send_message(message.channel, "{} users are connected and have a pawer account".format(registered_members))
     except Exception as e:
         print(str(e))
+
+
 async def user_count(message):
     try:
         registered_members = 0
@@ -131,6 +134,8 @@ async def background_task(cog_list):
 
 
 if __name__ == '__main__':
+    client.tip_module = Tips()
+
     client.add_cog(Bismuth(client))
     client.add_cog(Hypernodes(client))
     client.add_cog(Extra(client))

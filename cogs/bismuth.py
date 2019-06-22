@@ -5,7 +5,7 @@ Bismuth related cog
 import json
 import time
 from os import path, walk
-
+import os
 import discord
 from discord.ext import commands
 from modules.config import EMOJIS
@@ -28,7 +28,8 @@ DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge t
 Basically, you're using this service at your own risks.
 
 Type `Pawer accept` to say you understand and proceed."""
-
+#TIPS: {from:{"address":{"tip":10, "rain":20}}, to:{"address":{"tip":10, "rain":20}}}
+TIPS = {"from": {}, "to": {}}
 
 async def get_users_from_addresses(addresses: list):
     """
@@ -133,22 +134,26 @@ class Bismuth:
 
     @commands.command(name='balance', brief="Displays your current BIS balance", pass_context=True)
     async def balance(self, ctx, *, type: str=''):
-        # TODO: several types of balance (bis, usd, eur?) or by reactions rather than message ;)
-        user = User(ctx.message.author.id)
-        user_info = user.info()
-        # print(ctx.message.author.id, user_info)
-        if user_info and user_info['address']:
-                # User exists and validated the terms, has an address
-                balance = user.balance()
-                msg = "{}, your balance is {} {}".\
-                    format(ctx.message.author.display_name, balance, EMOJIS['Bismuth'])
-                em = discord.Embed(description=msg, colour=discord.Colour.green())
-                await self.bot.say(embed=em)
-                return
-        em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
-        em.set_author(name="You have to create your address first:")
-        await self.bot.say(embed=em)
-
+        try:
+            # TODO: several types of balance (bis, usd, eur?) or by reactions rather than message ;)
+            user = User(ctx.message.author.id)
+            user_info = user.info()
+            # print(ctx.message.author.id, user_info)
+            if user_info and user_info['address']:
+                    # User exists and validated the terms, has an address
+                    balance = user.balance()
+                    msg = "{}, your balance is {} {}".\
+                        format(ctx.message.author.display_name, balance, EMOJIS['Bismuth'])
+                    em = discord.Embed(description=msg, colour=discord.Colour.green())
+                    await self.bot.say(embed=em)
+                    return
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
+            em.set_author(name="You have to create your address first:")
+            await self.bot.say(embed=em)
+        except Exception as e:
+            print(str(e))
+            # Send a PM to the sender or answer if dedicated channel
+            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
     @commands.command(name='tip', brief="Tip a user, default 1 bis, min 0.1, max 50 BIS", pass_context=True)
     async def tip(self, ctx, who_to_tip: discord.Member, amount: str='1'):
         try:
@@ -187,6 +192,7 @@ class Bismuth:
                     await self.safe_send_message(who_to_tip, message)
                     return
                 send = user.send_bis_to(amount, user_to_tip_info['address'])
+                self.bot.tip_module.tip(user_info['address'], user_to_tip_info['address'], amount)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
@@ -243,8 +249,8 @@ class Bismuth:
                     if str(member.status) != "offline" and not member.bot and member.name != ctx.message.author.name:
                         #print(member.name, member.status, member.bot)
                         current_user = User(member.id)
-                        user_info = current_user.info()
-                        if user_info and user_info["address"]:
+                        member_info = current_user.info()
+                        if member_info and member_info["address"]:
                             registered_members.append(member)
                         else:
                             unregistered_members.append(member)
@@ -257,7 +263,9 @@ class Bismuth:
                     .format(individual_amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
                 final_message = "{} sent {:0.2f} {} each to: ".format(ctx.message.author.mention, individual_amount, EMOJIS['Bismuth'])
                 for current_member in registered_members[:how_many_real_users]:
-                    user.send_bis_to(individual_amount, User(current_member.id).info()['address'])
+                    to_address = User(current_member.id).info()['address']
+                    user.send_bis_to(individual_amount, to_address)
+                    self.bot.tip_module.tip(user_info['address'], user_info['address'], individual_amount, "rain")
                     final_message += current_member.mention + " "
                     await self.safe_send_message(current_member, message)
                 await self.bot.say(final_message)
