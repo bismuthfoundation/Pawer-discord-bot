@@ -192,7 +192,7 @@ class Dragginator:
                 message = "Yeah! You got a draggon egg from the rain of {} ({}) from the Bismuth discord!" \
                     .format(ctx.message.author, ctx.message.author.display_name)
                 final_message = "{} sent a draggon egg to: ".format(ctx.message.author.mention)
-
+                self.bot.tip_module.start_rain(user_info['address'], how_many_real_users, how_many_real_users, "eggrain")
                 for current_member in registered_members[:how_many_real_users]:
                     user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf",
                                      operation="dragg:gift", data=User(current_member.id).info()['address'])

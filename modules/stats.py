@@ -23,15 +23,21 @@ class Tips:
             for tip_type in self.tip_types:
                 if tip_type not in self.data[field][address]:
                     self.data[field][address][tip_type] = 0
+
     def add_user(self, address, user_id, user_name):
         try:
             self.cursor.execute("INSERT into users values(?,?,?)", (address, user_id, user_name))
             self.db.commit()
         except:
             print("error adding user {} to database".format(user_name))
+
     def tip(self, from_address, to_address, amount, tip_type="tip"):
         self.cursor.execute("INSERT into tips values(?,?,?,?,?)", (from_address, to_address, amount, tip_type,
                                                                    int(time.time())))
         self.db.commit()
 
+    def start_rain(self, address, total_amount, user_count, rain_type="rain"):
+        self.cursor.execute("INSERT into tips values(?,?,?,?,?)", (address, "{}:{}".format(total_amount, user_count), 0, rain_type,
+                                                                   int(time.time())))
+        self.db.commit()
 

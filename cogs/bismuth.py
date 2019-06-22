@@ -9,7 +9,7 @@ import os
 import discord
 from discord.ext import commands
 from modules.config import EMOJIS
-
+from discord.utils import get
 # from modules.config import CONFIG
 from modules.helpers import User, ts_to_string, async_get
 from bismuthclient.bismuthutil import BismuthUtil
@@ -28,8 +28,7 @@ DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge t
 Basically, you're using this service at your own risks.
 
 Type `Pawer accept` to say you understand and proceed."""
-#TIPS: {from:{"address":{"tip":10, "rain":20}}, to:{"address":{"tip":10, "rain":20}}}
-TIPS = {"from": {}, "to": {}}
+
 
 async def get_users_from_addresses(addresses: list):
     """
@@ -262,6 +261,7 @@ class Bismuth:
                 message = "Yeah! You got {:0.2f} {} from the rain of {} ({}) from the Bismuth discord!" \
                     .format(individual_amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
                 final_message = "{} sent {:0.2f} {} each to: ".format(ctx.message.author.mention, individual_amount, EMOJIS['Bismuth'])
+                self.bot.tip_module.start_rain(user_info['address'], individual_amount*how_many_real_users, how_many_real_users, "rain")
                 for current_member in registered_members[:how_many_real_users]:
                     to_address = User(current_member.id).info()['address']
                     user.send_bis_to(individual_amount, to_address)
@@ -534,11 +534,31 @@ class Bismuth:
                 'hypernodes': ["Number of 10k equivalent HN per round", 'https://hypernodes.bismuth.live/plots/posnet/weight.php'],
                 'blocktime': ["Mainnnet blocktime evolution", 'https://hypernodes.bismuth.live/plots/mainnet/blocktime.php']}
         if type not in urls:
-            msg = "\n".join(["`{}`: {}".format(a,b[0]) for a,b in urls.items()])
+            msg = "\n".join(["`{}`: {}".format(a,b[0]) for a, b in urls.items()])
             em = discord.Embed(description=msg, colour=discord.Colour.red())
             em.set_author(name="Error: Please specify a graph type")
             await self.bot.say(embed=em)
         em = discord.Embed()
         em.set_image(url=urls[type][1])
         em.set_author(name=urls[type][0])
+        await self.bot.say(embed=em)
+
+    @commands.command(name='board', brief="Shows stats of given action: tip/rain/eggrain", pass_context=True)
+    async def board(self, ctx, action:str):
+
+        with open("data/tips.json") as f:
+            data = json.load(f)
+        if action not in data:
+            await self.bot.say("unknown action")
+            return
+        msg = "who gave the most:\n"
+        for user in data[action]["from"]:
+            msg += "{} gave {} Bis\n".format(get(self.bot.get_all_members(), id=str(user[2])).display_name, user[0])
+
+        msg += "\n\nwho received the most:\n"
+        for user in data[action]["to"]:
+            msg += "{} received {} Bis\n".format(get(self.bot.get_all_members(), id=str(user[2])).display_name, user[0])
+
+        em = discord.Embed(description=msg, colour=discord.Colour.green())
+        em.set_author(name="{} board".format(action))
         await self.bot.say(embed=em)

@@ -58,9 +58,11 @@ class User:
 
     __slots__ = ('_base_path', '_user_id', '_wallet', '_info')
 
-    def __init__(self, user_id):
+    def __init__(self, user_id: str):
         global BISMUTH_CLIENT
+        user_id = str(user_id)
         self._user_id = user_id
+
         self._base_path = 'users/{}/{}/{}'.format(user_id[0], user_id[1], user_id)
         # print("self._base_path", self._base_path)
         base_dir = 'users/{}/{}'.format(user_id[0], user_id[1])
