@@ -107,6 +107,7 @@ async def user_count(message):
                 user_info = current_user.info()
                 if user_info and user_info["address"]:
                     registered_members += 1
+                    client.tip_module.add_user(user_info["address"], member.id, member.display_name)
         await client.send_message(message.channel, "{} users have a pawer account".format(registered_members))
     except Exception as e:
         print(str(e))
