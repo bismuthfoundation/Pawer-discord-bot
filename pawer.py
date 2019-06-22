@@ -6,7 +6,7 @@ import asyncio
 
 from discord.ext import commands
 from discord.utils import get
-
+import discord
 from cogs.bismuth import Bismuth
 from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
@@ -35,6 +35,8 @@ async def on_ready():
     print(client.user.id)
     print('------')
     EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
+    await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands didn't got an answer, just resend it.")
+
 
 
 @client.event
