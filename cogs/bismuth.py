@@ -554,13 +554,13 @@ class Bismuth:
         if action not in data:
             await self.bot.say("unknown action")
             return
-        msg = "who gave the most:\n"
+        msg = "__Who gave the most:__\n\n"
         for user in data[action]["from"]:
-            msg += "{} gave {} Bis\n".format(get(self.bot.get_all_members(), id=str(user[2])).display_name, user[0])
+            msg += "{} gave {:0.2f} Bis\n".format(get(self.bot.get_all_members(), id=str(user[2])).display_name, user[0])
 
-        msg += "\n\nwho received the most:\n"
+        msg += "\n\n__Who received the most:__\n\n"
         for user in data[action]["to"]:
-            msg += "{} received {} Bis\n".format(get(self.bot.get_all_members(), id=str(user[2])).display_name, user[0])
+            msg += "{} received {:0.2f} Bis\n".format(get(self.bot.get_all_members(), id=str(user[2])).display_name, user[0])
 
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{} board".format(action))
