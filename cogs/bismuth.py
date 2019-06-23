@@ -508,6 +508,9 @@ class Bismuth:
         address = user.create_wallet()
         info = {"accept": int(time.time()), "address": address}
         user.save(info)
+
+        self.bot.tip_module.add_user(address, ctx.message.author.id, ctx.message.author.display_name)
+
         # TODO: safety, store an encrypted backup of the wallet elsewhere.
         msg = "Your {} address is `{}`".format(EMOJIS['Bismuth'], info['address'])
         em = discord.Embed(description=msg, colour=discord.Colour.green())

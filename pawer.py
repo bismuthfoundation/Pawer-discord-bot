@@ -71,7 +71,7 @@ async def on_message(message):
         print('Unauth channel')
     else:
         if message.content.startswith('Pawer eligibility'):
-            await elegibility(message)
+            await eligibility(message)
             return
         if message.content.startswith('Pawer users'):
             await user_count(message)
@@ -84,7 +84,7 @@ async def on_message(message):
             await client.remove_reaction(message, '⏳', client.user)  # Hourglass
 
 
-async def elegibility(message):
+async def eligibility(message):
     try:
         registered_members = 0
         for member in client.get_all_members():
