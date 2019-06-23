@@ -216,6 +216,10 @@ class Bismuth:
     @commands.command(name='rain', brief="Distribute a given amount between n users", pass_context=True)
     async def rain(self, ctx, total_amount: str='10', how_many_users: str='10'):
         try:
+            if "/" in total_amount:
+                data = total_amount.split("/")
+                total_amount = float(data[0])
+                how_many_users = float(data[1])
             total_amount = float(total_amount)
             how_many_users = int(how_many_users)
 
@@ -516,7 +520,6 @@ class Bismuth:
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
         await self.bot.say(embed=em)
-
 
     @commands.command(name='terms', brief="Remind the current Pawer terms of use.", pass_context=True)
     async def terms(self, ctx):
