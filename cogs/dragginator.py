@@ -221,6 +221,16 @@ class Dragginator:
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
 
+    @dragg.command(name='cup', brief="Give informations about the cup",pass_context=True)
+    async def cup(self, ctx):
+
+        user = User(ctx.message.author.id)
+        user_info = user.info()
+        data = await async_get(
+            "https://dragginator.com/api/cup_api.php?address={}".format(user_info['address']), is_json=True)
+        em = discord.Embed(description=data["message"], colour=discord.Colour.green())
+        em.set_author(name=data["title"])
+        await self.bot.say(embed=em)
 
     async def background_task(self):
         # Only run every 15 min
