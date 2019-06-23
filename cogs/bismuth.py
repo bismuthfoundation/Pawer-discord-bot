@@ -546,7 +546,7 @@ class Bismuth:
         em.set_author(name=urls[type][0])
         await self.bot.say(embed=em)
 
-    @commands.command(name='board', brief="Shows stats of given action: tip/rain/eggrain", pass_context=True)
+    @commands.command(name='board', brief="Shows stats of given action: tip/rain", pass_context=True)
     async def board(self, ctx, action:str):
 
         with open("data/tips.json") as f:
