@@ -527,12 +527,6 @@ class Bismuth:
         em.set_author(name="Current terms of use:")
         await self.bot.say(embed=em)
 
-    @commands.command(name='terms', brief="Remind the current Pawer terms of use.", pass_context=True)
-    async def terms(self, ctx):
-        em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.green())
-        em.set_author(name="Current terms of use:")
-        await self.bot.say(embed=em)
-
     @commands.command(name='graph', brief="Shows bismuth graphs: pools, diff, blocktime, hypernodes", pass_context=True)
     async def graph(self, ctx, type=''):
         urls = {'pools': ["Bismuth Pools estimated hashrate", 'https://hypernodes.bismuth.live/plots/hr.php'],
