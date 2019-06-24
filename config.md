@@ -28,12 +28,13 @@ That is the channel id.
 # How to get a token
 (standard procedure whatever the discord bot is, there are online resources on this)
 
-http://discordapp.com/developers/applications/me  
-New application  
-Give the bot a name  
-In the box marked App Bot User, click on "Token: Click to reveal."  
-scroll up to the box marked "App Details" and find your Client ID, a long number.   
-Copy the number and add it to this URL, in the place of word CLIENTID.  
-https://discordapp.com/oauth2/authorize?&client_id=CLIENTID&scope=bot&permissions=8  
-Copy the URL with your client ID number in it into your browser.  
-That’ll take you to a website where you can tell Discord where to send your bot. 
+1. Open link [http://discordapp.com/developers/applications/me](http://discordapp.com/developers/applications/me)  
+2. Click on `New application`  
+3. Give the app a name  
+4. Create a new bot by clicking on `Bot` and then `Create bot`  
+5. On the bot page, click on `Click to Reveal Token` to get you bot token
+6. Back on `General Information` copy the `Client ID`  
+7. Add the Client ID to this URL (replace word CLIENTID)  
+[https://discordapp.com/oauth2/authorize?&client_id=CLIENTID&scope=bot&permissions=8](https://discordapp.com/oauth2/authorize?&client_id=CLIENTID&scope=bot&permissions=8)  
+8. Open the adjusted URL in your browser  
+9. That’ll take you to a website where you can add the bot to a Discord server
