@@ -40,6 +40,7 @@ So, when you'll get some tip, you'll have a thought for Georg Pawer :D
 
 - Discord Python API  
   https://github.com/Rapptz/discord.py
+  Version 0.16.12 was used.
 - Python Exemples  
   https://github.com/AlexFlipnote/discord_bot.py  
   https://github.com/FoggyIO/DiscordPythonBots  
