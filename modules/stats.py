@@ -4,6 +4,8 @@ import time
 
 class Tips:
     def __init__(self, db_path="data/stats.db"):
+        os.makedirs("data", exist_ok=True)
+        
         self.db = sqlite3.connect(db_path)
         self.cursor = self.db.cursor()
 
