@@ -6,7 +6,7 @@ import asyncio
 
 from discord.ext import commands
 from discord.utils import get
-import discord
+# import discord
 from cogs.bismuth import Bismuth
 from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
@@ -15,6 +15,7 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
 from modules.helpers import User
 from modules.stats import Tips
+
 __version__ = '0.58'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
@@ -30,14 +31,14 @@ async def on_ready():
     Likewise, this function is not guaranteed to only be called once.
     This library implements reconnection logic and thus will end up calling this event whenever a RESUME request fails.
     """
-    global EMOJIS
+    #  global EMOJIS
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
     EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
-    await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands didn't get an answer, just resend it.")
-
+    await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands "
+                                                                            "didn't get an answer, just resend it.")
 
 
 @client.event
@@ -60,10 +61,10 @@ async def on_message(message):
     if not message.content.startswith(BOT_PREFIX):
         # Not for us
         return
-    if client.user.id != message.author.id: # check not a bot message
+    if client.user.id != message.author.id:  # check not a bot message
         print("Got {} from {}".format(message.content, message.author.display_name))
     if message.content.startswith('Pawer tip'):
-        # Exception
+        #  Exception
         await client.process_commands(message)
         return
     if message.server and message.channel.id not in CONFIG['bot_channel']:
@@ -94,7 +95,8 @@ async def eligibility(message):
                 user_info = current_user.info()
                 if user_info and user_info["address"]:
                     registered_members += 1
-        await client.send_message(message.channel, "{} users are connected and have a pawer account".format(registered_members))
+        await client.send_message(message.channel,
+                                  "{} users are connected and have a pawer account".format(registered_members))
     except Exception as e:
         print(str(e))
 
@@ -108,7 +110,7 @@ async def user_count(message):
                 user_info = current_user.info()
                 if user_info and user_info["address"]:
                     registered_members += 1
-                    #client.tip_module.add_user(user_info["address"], member.id, member.display_name)
+                    # client.tip_module.add_user(user_info["address"], member.id, member.display_name)
         await client.send_message(message.channel, "{} users have a pawer account".format(registered_members))
     except Exception as e:
         print(str(e))
@@ -121,7 +123,9 @@ async def about(ctx):
     # release logs?
     # number of wallets, of users, of messages?
     # other stats frm the bot (sqlite base?)
-    await client.say("Pawer bot Version {}\nI'm your Bismuth butler. Type `Pawer help` for a full commands list.".format(__version__))
+    await client.say(
+        "Pawer bot Version {}\nI'm your Bismuth butler. Type `Pawer help` for a full commands list.".format(
+            __version__))
 
 
 async def background_task(cog_list):

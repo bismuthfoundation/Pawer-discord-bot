@@ -21,6 +21,7 @@ Basically, you're using this service at your own risks.
 
 Type `Pawer accept` to say you understand and proceed."""
 
+
 def _get_from_servers(bot, getter, argument):
     result = None
     for server in bot.servers:
@@ -98,7 +99,6 @@ class Dragginator:
     async def buy(self, ctx):
         """Buy an egg with Bis"""
         user = User(ctx.message.author.id)
-        user_info = user.info()
         result = user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf",
                                   check_balance=True)
         if result["txid"]:
@@ -151,7 +151,8 @@ class Dragginator:
         em.set_author(name="Advent calendar")
         await self.bot.say(embed=em)
 
-    @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users (cost 3 bis per user)", pass_context=True)
+    @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users (cost 3 bis per user)",
+                   pass_context=True)
     async def eggrain(self, ctx, how_many_users: str = '5'):
         try:
             how_many_users = int(how_many_users)
@@ -165,8 +166,8 @@ class Dragginator:
             user_info = user.info()
             if user_info and user_info['address']:
                 balance = float(user.balance())
-                msg = "{} rain {} eggs to {} users, balance is {} ".format(ctx.message.author.display_name, how_many_users,
-                                                                          how_many_users, balance)
+                msg = "{} rain {} eggs to {} users, balance is {} ".format(ctx.message.author.display_name,
+                                                                           how_many_users, how_many_users, balance)
                 print(msg)
                 if balance < how_many_users * (EGG_PRICE + 0.011):
                     print("balance too low")
@@ -232,7 +233,7 @@ class Dragginator:
         em.set_author(name=data["title"])
         await self.bot.say(embed=em)
 
-    @dragg.command(name='cup', brief="Give informations about the cup",pass_context=True)
+    @dragg.command(name='cup', brief="Give informations about the cup", pass_context=True)
     async def cup(self, ctx):
 
         user = User(ctx.message.author.id)
@@ -264,7 +265,7 @@ class Dragginator:
         result = await get_users_from_addresses(winners)
         for address, discord_id in result.items():
             member = _get_from_servers(self.bot, 'get_member', discord_id)
-            await self.bot.send_message(member,"Hey, It seems than you can claim a free egg today!\n"
+            await self.bot.send_message(member, "Hey, It seems than you can claim a free egg today!\n"
                                                "Just type `pawer dragg claim`, and you'll get a free egg")
 
         data["last_day"] = today
@@ -272,5 +273,3 @@ class Dragginator:
             json.dump(data, f)
 
     # badges (empty or address)
-
-

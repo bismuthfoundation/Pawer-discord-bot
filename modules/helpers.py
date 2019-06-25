@@ -21,7 +21,7 @@ def ts_to_string(timestamp):
 
 HTTP_SESSION = None
 
-BISMUTH_CLIENT =  BismuthClient(verbose=True)
+BISMUTH_CLIENT = BismuthClient(verbose=True)
 
 
 async def async_get(url, is_json=False):
@@ -156,7 +156,7 @@ class User:
                 error = 'MP_INSERT'
         else:
             error = 'NO_WALLET'
-        return {'txid': txid, 'error':error}
+        return {'txid': txid, 'error': error}
 
     def sign_message(self, data):
         """
@@ -172,4 +172,4 @@ class User:
                 error = 'ERR_SIGN'
         else:
             error = 'NO_WALLET'
-        return {'sign': sign, 'error':error}
+        return {'sign': sign, 'error': error}

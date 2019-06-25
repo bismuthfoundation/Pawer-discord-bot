@@ -18,15 +18,6 @@ class Tips:
     def stop(self):
         self.db.close()
 
-    def create_if_not_exists(self, address):
-        for field in ["from", "to"]:
-            if address not in self.data[field]:
-                self.data[field][address] = {}
-
-            for tip_type in self.tip_types:
-                if tip_type not in self.data[field][address]:
-                    self.data[field][address][tip_type] = 0
-
     def add_user(self, address, user_id, user_name):
         try:
             self.cursor.execute("INSERT into users values(?,?,?)", (address, user_id, user_name))
@@ -40,7 +31,7 @@ class Tips:
         self.db.commit()
 
     def start_rain(self, address, total_amount, user_count, rain_type="rain"):
-        self.cursor.execute("INSERT into tips values(?,?,?,?,?)", (address, "{}:{}".format(total_amount, user_count), 0, rain_type,
-                                                                   int(time.time())))
+        self.cursor.execute("INSERT into tips values(?,?,?,?,?)", (address, "{}:{}".format(total_amount, user_count), 0,
+                                                                   rain_type, int(time.time())))
         self.db.commit()
 

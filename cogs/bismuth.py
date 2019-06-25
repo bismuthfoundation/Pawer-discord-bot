@@ -71,7 +71,7 @@ class Bismuth:
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
         await self.bot.say("{} price is:\n▸ {:0.8f} BTC or {:0.2f} USD on Cryptopia\n▸ {:0.8f} BTC or {:0.2f} USD on QTrade"
                            .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
-                                   qtrade['BTC']['lastPrice'],qtrade['USD']['lastPrice']))
+                                   qtrade['BTC']['lastPrice'], qtrade['USD']['lastPrice']))
 
     @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
     async def bismuth(self, ctx):
