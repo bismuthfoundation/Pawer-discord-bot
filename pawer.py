@@ -54,7 +54,8 @@ async def on_message(message):
         message.content = message.content.replace('!rain', 'Pawer rain')
     if message.content.startswith('!Rain'):
         message.content = message.content.replace('!Rain', 'Pawer rain')
-
+    if message.content.startswith('Pawer dragg help'):
+        message.content = message.content.replace('Pawer dragg help', 'Pawer help dragg')
 
     if not message.content.startswith(BOT_PREFIX):
         # Not for us
