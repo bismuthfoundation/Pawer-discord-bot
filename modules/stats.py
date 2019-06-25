@@ -1,5 +1,6 @@
 import sqlite3
 import time
+import os
 
 
 class Tips:
