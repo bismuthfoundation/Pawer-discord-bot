@@ -221,13 +221,24 @@ class Dragginator:
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
 
+    @dragg.command(name='see', brief="show the specified egg/draggon", pass_context=True)
+    async def see(self, ctx, dna: str, egg_or_draggon: str="egg"):
+        data = await async_get(
+            "https://dragginator.com/api/pawer/see_api.php?dna={}&type={}".format(dna, egg_or_draggon), is_json=True)
+
+        em = discord.Embed()
+        if "url" in data:
+            em.set_image(url=data["url"])
+        em.set_author(name=data["title"])
+        await self.bot.say(embed=em)
+
     @dragg.command(name='cup', brief="Give informations about the cup",pass_context=True)
     async def cup(self, ctx):
 
         user = User(ctx.message.author.id)
         user_info = user.info()
         data = await async_get(
-            "https://dragginator.com/api/cup_api.php?address={}".format(user_info['address']), is_json=True)
+            "https://dragginator.com/api/pawer/cup_api.php?address={}".format(user_info['address']), is_json=True)
         em = discord.Embed(description=data["message"], colour=discord.Colour.green())
         em.set_author(name=data["title"])
         await self.bot.say(embed=em)
