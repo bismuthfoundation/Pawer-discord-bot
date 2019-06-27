@@ -87,6 +87,8 @@ By default:
 
 Ex: `Pawer rain 10 20` will give 20 random online users 0.5 $BIS each.
 
+> An additionnal alias for that is `Pawer rain 1/20`, meaning "rain 1 $BIS on 20 users".
+
 ### withdraw
 *bismuth_address*  
 *amount* or *all*  
@@ -111,31 +113,54 @@ Ex: `Pawer terms`
 
 ### hypernodes
 
-Overview of the main hypernodes metrics.
+Overview of the main hypernodes metrics.  
+(Notice the "s" !)
 
 Ex: `Pawer hypernodes`
 
+## Hypernode commands
+
+Allows you to passively monitor all of your Hypernodes.  
+Set your alerts once, and get an alert via PM every time one of your watched HN goes down.
+- Sends a DM if a HN you watch is unregistered  
+- Sends a DM when a HN you watch gets 3 failures in a row (around 15 min, avoids false positives)  
+- Only send a PM once. The alert is then auto-reactivated when the HN goes up again.
+
+All "hypernode" commands can also be called by the short handle "hn".
+
 ### hypernode watch
-[*ip*]
+*ip* or *ip1 ip2 ip3*
 
-> **Not functional yet**
-
-Adds an hypernode ip to watch.  
-If this hypernode goes inactive, you'll get a DM.
+Adds a hypernode ip (or list of ips, separated by spaces) to watch.  
+If any of these hypernodes goes inactive, you'll get a DM (once, until you fix it)
 
 You can watch several hypernodes by issuing several watch commands.  
 Hypernode has to be registered and active to be watched.
 
-Without an ip, shows the list of currently watching hypernodes.
-
 Ex: `Pawer hypernode watch 1.2.3.4`  
-Ex: `Pawer hypernode watch`
+Ex: `Pawer hn watch 1.2.3.4` 
+Ex: `Pawer hypernode watch 1.2.3.4 1.2.4.5 1.6.7.8`  
+
 
 ### hypernode unwatch
-*ip*
+*ip* or *ip1 ip2 ip3*
 
-> **Not functional yet**
+Removes a hypernode ip (or list of ips, separated by spaces) from watch. 
 
-Removes an hypernode ip to watch.  
+Ex: `Pawer hypernode unwatch 1.2.3.4`  
+Ex: `Pawer hn unwatch 1.2.3.4`
 
-Ex: `Pawer hypernode unwatch 1.2.3.4`
+### hypernode list
+
+Lists all currently watched hypernodes, with their last known height (can be 5 to 10 min late) and their label.  
+Failing Hypernodes are displayed in bold.
+
+Ex: `Pawer hypernode list`  
+Ex: `Pawer hn list`
+
+### hypernode label
+
+Defines an optional label for a hypernode you're currently watching. That label will show in the "list" command.
+
+Ex: `Pawer hypernode label 1.2.3.4 My first Hypernode rocks!`  
+Ex: `Pawer hn label 3.4.5.6 My second Hypernode is awesome`
