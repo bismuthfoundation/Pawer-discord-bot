@@ -87,7 +87,7 @@ class Hypernodes:
     @commands.group(name='hypernode', brief="Hypernode commands", pass_context=True)
     async def hypernode(self, ctx):
         if ctx.invoked_subcommand is None:
-            await self.bot.say('hypernode needs a subcommand: watch, unwatch'.format(ctx))
+            await self.bot.say('hypernode needs a subcommand: watch, unwatch, list'.format(ctx))
 
     async def hn_watch_list(self, user_info, for_print=False):
         hn_list = user_info.get('hn_watch', [])

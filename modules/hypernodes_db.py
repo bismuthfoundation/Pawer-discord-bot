@@ -55,10 +55,10 @@ class HypernodesDb:
         self.db.commit()
         self.cursor.execute("SELECT distinct(ip) FROM users_info")
         ips = self.cursor.fetchall()
-        hn_height = [[status[1], status[6]] for status in hypernodes_data.values() if (status[1],) in ips]
+        hn_height = [[status[1], status[8]] for status in hypernodes_data.values() if (status[1],) in ips]
         current_time = int(time.time())
         for hn in hn_height:
-            if hn[1] == -1:
+            if hn[1] == "Inactive":
                 hn[1] = 1
             else:
                 hn[1] = 0
