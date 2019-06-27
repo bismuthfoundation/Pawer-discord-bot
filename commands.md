@@ -138,7 +138,7 @@ You can watch several hypernodes by issuing several watch commands.
 Hypernode has to be registered and active to be watched.
 
 Ex: `Pawer hypernode watch 1.2.3.4`  
-Ex: `Pawer hn watch 1.2.3.4` 
+Ex: `Pawer hn watch 1.2.3.4`  
 Ex: `Pawer hypernode watch 1.2.3.4 1.2.4.5 1.6.7.8`  
 
 
