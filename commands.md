@@ -99,7 +99,7 @@ No confirmation is required.
 Tx fees are taken from your wallet.  
 When using *all* instead of an amount, the total sent will be your balance less the fees.
 
-Ex: `Pawer withdraw 3b7fc45dfb30a95b0277ed0e5fe0244460827f59f08b8f0b9e7da66e 10`
+Ex: `Pawer withdraw 3b7fc45dfb30a95b0277ed0e5fe0244460827f59f08b8f0b9e7da66e 10`  
 Ex: `Pawer withdraw 3b7fc45dfb30a95b0277ed0e5fe0244460827f59f08b8f0b9e7da66e 10 gift`
 
 ### terms
