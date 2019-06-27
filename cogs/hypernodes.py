@@ -73,7 +73,7 @@ class Hypernodes:
     async def _hn_status(self):
         """Returns cached (3 min) or live hn status"""
         if path.isfile(HN_STATUS_CACHE) and path.getmtime(HN_STATUS_CACHE) > time.time() - 3 * 60:
-            print(path.getmtime(HN_STATUS_CACHE), time.time(), time.time() - 3 * 60)
+            #print(path.getmtime(HN_STATUS_CACHE), time.time(), time.time() - 3 * 60)
             with open(HN_STATUS_CACHE, 'r') as f:
                 return json.load(f)
         url = 'https://hypernodes.bismuth.live/status_ex.json'
@@ -140,26 +140,30 @@ class Hypernodes:
         em.set_author(name="Hypernodes:")
         await self.bot.say(embed=em)
 
+    def fill(self, text, final_length, char=" "):
+        return text + char * (final_length - len(text))
+
     @hypernode.command(name='list', brief="shows your watch list", pass_context=True)
     async def list(self, ctx):
         """print the current list"""
         user = User(ctx.message.author.id)
-        msg = ""
         hn_status = await self._hn_status()
         hn_list = self.bot.hypernodes_module.get_list(user._user_id)
         hn_height = [(status[1], status[6]) for status in hn_status.values() if (status[1],) in hn_list]
+        msg = "You are watching {} hypernode".format(len(hn_height))
+        if len(hn_height) > 1:
+            msg += "s"
+        msg += "\n"
         for hn in hn_height:
-            text = "▸ {}:   {}".format(hn[0], hn[1])
+            text = "`▸ {}   {}`".format(self.fill(hn[0], 15), self.fill(str(hn[1]), 8))
             if hn[1] <= 0:
                 text = "**" + text + "**"
             msg += text+"\n"
 
-        em = discord.Embed(description=msg, colour=discord.Colour.green())
-        title = "You are watching {} hypernode".format(len(hn_height))
-        if len(hn_height) > 1:
-            title += "s"
-        em.set_author(name=title)
-        await self.bot.say(embed=em)
+        #em = discord.Embed(description=msg, colour=discord.Colour.green())
+
+        #em.set_author(name=title)
+        await self.bot.say(msg)
 
     async def background_task(self):
         # Only run every 15 min
