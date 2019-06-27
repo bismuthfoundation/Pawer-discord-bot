@@ -77,7 +77,7 @@ class Bismuth:
 
     @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
     async def bismuth(self, ctx):
-        MARKETS = ["qtrade", "vinex"]  # Markets we want to list
+        MARKETS = ["qtrade", "vinex", "graviex"]  # Markets we want to list
         # TODO: cache
         url = "https://api.coingecko.com/api/v3/coins/bismuth/tickers"
         api = await async_get(url, is_json=True)
