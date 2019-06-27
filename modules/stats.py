@@ -34,4 +34,3 @@ class Tips:
         self.cursor.execute("INSERT into tips values(?,?,?,?,?)", (address, "{}:{}".format(total_amount, user_count), 0,
                                                                    rain_type, int(time.time())))
         self.db.commit()
-

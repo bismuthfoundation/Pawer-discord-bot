@@ -11,6 +11,7 @@ from discord.ext import commands
 from distutils.version import LooseVersion
 from modules.helpers import User, async_get
 from modules.config import EMOJIS
+from modules.hypernodes_db import HypernodesDb
 from os import path
 import os, sys
 import time
@@ -23,6 +24,8 @@ class Hypernodes:
 
     def __init__(self, bot):
         self.bot = bot
+        self.bot.hypernodes_module = HypernodesDb()
+        self.background_count = 0
 
     @commands.command(name='hypernodes', brief="Generic Hypernodes info",
                       pass_context=True)
@@ -40,7 +43,7 @@ class Hypernodes:
             else:
                 status['inactive'] += 1
                 status['inactive_collateral'] += hn[3] * 10000
-            version = '0' if hn[7]=='?' else hn[7]
+            version = '0' if hn[7] == '?' else hn[7]
             if LooseVersion(version) >= LooseVersion(status['latest_version']):
                 status['latest_version'] = hn[7]
             height = 0 if not hn[6] else int(hn[6])
@@ -69,8 +72,8 @@ class Hypernodes:
 
     async def _hn_status(self):
         """Returns cached (3 min) or live hn status"""
-        if path.isfile(HN_STATUS_CACHE) and path.getmtime(HN_STATUS_CACHE) > time.time() - 3*60:
-            print(path.getmtime(HN_STATUS_CACHE), time.time(), time.time() - 3*60)
+        if path.isfile(HN_STATUS_CACHE) and path.getmtime(HN_STATUS_CACHE) > time.time() - 3 * 60:
+            print(path.getmtime(HN_STATUS_CACHE), time.time(), time.time() - 3 * 60)
             with open(HN_STATUS_CACHE, 'r') as f:
                 return json.load(f)
         url = 'https://hypernodes.bismuth.live/status_ex.json'
@@ -95,13 +98,12 @@ class Hypernodes:
             return '\n'.join(["{} height {}".format(s[0], s[1]) for s in hn_height])
         return hn_height
 
-
-    # @hypernode.command(name='watch', brief="WIP - Add an HN to the watch list and warn via PM when down", pass_context=True)
-    async def watch(self, ctx, hypernode: str=''):
+    @hypernode.command(name='watch', brief="Add an HN to the watch list and warn via PM when down", pass_context=True)
+    async def watch(self, ctx, hypernode: str = ''):
         """Adds a hn to watch, print the current list"""
         try:
             user = User(ctx.message.author.id)
-            user_info = user.info()
+            # user_info = user.info()
             msg = ''
             if hypernode:
                 hn_status = await self._hn_status()
@@ -112,18 +114,15 @@ class Hypernodes:
                     em.set_author(name="Error")
                     await self.bot.say(embed=em)
                     return
-                # add the hhn to the list
-                if hypernode not in user_info.get('hn_watch', []):
-                    watch =  user_info.get('hn_watch', [])
-                    watch.append(hypernode)
-                    # TODO: add to reverse index
-                    user_info['hn_watch'] = watch
-                    msg = "Added {}\n".format(hypernode)
-                    user.save(user_info)
+                # add the hn to the list
+                self.bot.hypernodes_module.watch(user._user_id, hypernode)
+                msg = "Added {}\n".format(hypernode)
+            """
             watch_list = await self.hn_watch_list(user_info, for_print=True)
             msg += watch_list
+            """
             em = discord.Embed(description=msg, colour=discord.Colour.green())
-            em.set_author(name="You're watching...")
+            em.set_author(name="Hypernodes:")
             await self.bot.say(embed=em)
         except Exception as e:
             print(e)
@@ -131,23 +130,40 @@ class Hypernodes:
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             print(exc_type, fname, exc_tb.tb_lineno)
 
-    # @hypernode.command(name='unwatch', brief="WIP - Removes an HN from the watch list", pass_context=True)
-    async def unwatch(self, ctx, hypernode: str=''):
+    @hypernode.command(name='unwatch', brief="Removes an HN from the watch list", pass_context=True)
+    async def unwatch(self, ctx, hypernode: str = ''):
         """Adds a hn to watch, print the current list"""
         user = User(ctx.message.author.id)
-        user_info = user.info()
         msg = ''
         if hypernode:
-            # add the hhn to the list
-            if hypernode in user_info.get('hn_watch', []):
-                watch =  user_info.get('hn_watch', [])
-                watch = [hn for hn in watch if hn != hypernode]
-                # TODO: add to reverse index
-                user_info['hn_watch'] = watch
-                msg = "Removed {}\n".format(hypernode)
-                user.save(user_info)
-        watch_list = await self.hn_watch_list(user_info, for_print=True)
-        msg += watch_list
+            self.bot.hypernodes_module.unwatch(user._user_id, hypernode)
+            msg = "Removed {}\n".format(hypernode)
         em = discord.Embed(description=msg, colour=discord.Colour.green())
-        em.set_author(name="You're watching...")
+        em.set_author(name="Hypernodes:")
         await self.bot.say(embed=em)
+
+    @hypernode.command(name='list', brief="shows your watch list", pass_context=True)
+    async def list(self, ctx):
+        """print the current list"""
+        user = User(ctx.message.author.id)
+        msg = ""
+        hn_status = await self._hn_status()
+        hn_list = self.bot.hypernodes_module.get_list(user._user_id)
+        hn_height = [(status[1], status[6]) for status in hn_status.values() if (status[1],) in hn_list]
+        for hn in hn_height:
+            msg += "▸ {}:   {}".format(hn[0], hn[1])
+
+        em = discord.Embed(description=msg, colour=discord.Colour.green())
+        em.set_author(name="You are watching:")
+        await self.bot.say(embed=em)
+
+    async def background_task(self):
+        # Only run every 15 min
+        self.background_count += 1
+        if self.background_count < 5:
+            return
+        self.background_count = 0
+
+        hn_status = await self._hn_status()
+        await self.bot.hypernodes_module.update_nodes_status(hn_status, self.bot)
+        await self.bot.hypernodes_module.get_nodes_status(self.bot)

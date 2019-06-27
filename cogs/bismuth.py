@@ -14,6 +14,7 @@ from discord.utils import get
 from modules.helpers import User, ts_to_string, async_get
 from bismuthclient.bismuthutil import BismuthUtil
 from random import shuffle
+from modules.stats import Tips
 """
 Potential todo:
     play paper / rock / scissor
@@ -55,6 +56,7 @@ class Bismuth:
 
     def __init__(self, bot):
         self.bot = bot
+        self.bot.tip_module = Tips()
 
     async def safe_send_message(self, recipient, message):
         try:

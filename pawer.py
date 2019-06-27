@@ -14,7 +14,6 @@ from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
 from modules.helpers import User
-from modules.stats import Tips
 
 __version__ = '0.58'
 
@@ -140,15 +139,14 @@ async def background_task(cog_list):
 
 
 if __name__ == '__main__':
-    client.tip_module = Tips()
-
     client.add_cog(Bismuth(client))
-    client.add_cog(Hypernodes(client))
+    hypernodes = Hypernodes(client)
+    client.add_cog(hypernodes)
     client.add_cog(Extra(client))
     dragg = Dragginator(client)
     client.add_cog(dragg)
     client.add_cog(Autogame(client))
 
-    client.loop.create_task(background_task([dragg]))
+    client.loop.create_task(background_task([dragg, hypernodes]))
 
     client.run(CONFIG['token'])
