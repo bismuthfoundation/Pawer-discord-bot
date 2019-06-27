@@ -149,10 +149,16 @@ class Hypernodes:
         hn_list = self.bot.hypernodes_module.get_list(user._user_id)
         hn_height = [(status[1], status[6]) for status in hn_status.values() if (status[1],) in hn_list]
         for hn in hn_height:
-            msg += "▸ {}:   {}\n".format(hn[0], hn[1])
+            text = "▸ {}:   {}".format(hn[0], hn[1])
+            if hn[1] <= 0:
+                text = "**" + text + "**"
+            msg += text+"\n"
 
         em = discord.Embed(description=msg, colour=discord.Colour.green())
-        em.set_author(name="You are watching:")
+        title = "You are watching {} hypernode".format(len(hn_height))
+        if len(hn_height) > 1:
+            title += "s"
+        em.set_author(name=title)
         await self.bot.say(embed=em)
 
     async def background_task(self):
