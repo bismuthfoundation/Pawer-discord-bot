@@ -17,7 +17,7 @@ class HypernodesDb:
         self.db = sqlite3.connect(db_path)
         self.cursor = self.db.cursor()
 
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS users_info (user_id TEXT, ip TEXT)")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS users_info (user_id TEXT, ip TEXT, description TEXT)")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS nodes_info (ip TEXT PRIMARY KEY, status INTEGER, "
                             "timestamp INTEGER)")
         self.cursor.execute("CREATE INDEX IF NOT EXISTS user_id on users_info(user_id);")
@@ -30,7 +30,11 @@ class HypernodesDb:
         self.db.close()
 
     def watch(self, user_id, ip):
-        self.cursor.execute("INSERT into users_info values(?,?)", (user_id, ip))
+        self.cursor.execute("INSERT into users_info values(?,?,'')", (user_id, ip))
+        self.db.commit()
+
+    def set_label(self, user_id, ip, text):
+        self.cursor.execute("UPDATE users_info SET description=? where user_id=? and ip=?", (text, user_id, ip))
         self.db.commit()
 
     def unwatch(self, user_id, ip):
@@ -78,5 +82,5 @@ class HypernodesDb:
                                          .format(node[1]), bot)
 
     def get_list(self, user_id):
-        self.cursor.execute("SELECT distinct(ip) FROM users_info WHERE user_id=?", (user_id,))
+        self.cursor.execute("SELECT distinct(ip), description FROM users_info WHERE user_id=?", (user_id,))
         return self.cursor.fetchall()

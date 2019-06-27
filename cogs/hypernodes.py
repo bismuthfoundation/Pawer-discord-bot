@@ -98,6 +98,21 @@ class Hypernodes:
             return '\n'.join(["{} height {}".format(s[0], s[1]) for s in hn_height])
         return hn_height
 
+    @hypernode.command(name='label', brief="Add an description to the HN", pass_context=True)
+    async def label(self, ctx, hypernode, *description):
+        try:
+            user = User(ctx.message.author.id)
+            text = " ".join(description)
+
+            self.bot.hypernodes_module.set_label(user._user_id, hypernode, text)
+
+            await self.bot.say("{} is now {}".format(hypernode, text))
+        except Exception as e:
+            print(e)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+
     @hypernode.command(name='watch', brief="Add an HN to the watch list and warn via PM when down", pass_context=True)
     async def watch(self, ctx, *hypernodes):
         """Adds a hn to watch, print the current list"""
@@ -148,25 +163,27 @@ class Hypernodes:
         """print the current list"""
         user = User(ctx.message.author.id)
         hn_status = await self._hn_status()
-        hn_list = self.bot.hypernodes_module.get_list(user._user_id)
-        hn_height = [(status[1], status[6]) for status in hn_status.values() if (status[1],) in hn_list]
+        hn_list = {}
+        for hn in self.bot.hypernodes_module.get_list(user._user_id):
+            hn_list[hn[0]] = hn[1]
+        hn_height = [(status[1], status[6]) for status in hn_status.values() if status[1] in hn_list]
         msg = "You are watching {} hypernode".format(len(hn_height))
         if len(hn_height) > 1:
             msg += "s"
         msg += "\n"
         for hn in hn_height:
-            text = "`▸ {}   {}`".format(self.fill(hn[0], 15), self.fill(str(hn[1]), 8))
+            char = "-"
+            if hn[1] <= 0:
+                char = "▸"
+            text = "`{} {}   {} | {}`".format(char, self.fill(hn[0], 15), self.fill(str(hn[1]), 8), hn_list[hn[0]])
             if hn[1] <= 0:
                 text = "**" + text + "**"
             msg += text+"\n"
 
-        #em = discord.Embed(description=msg, colour=discord.Colour.green())
-
-        #em.set_author(name=title)
         await self.bot.say(msg)
 
     async def background_task(self):
-        # Only run every 15 min
+        # Only run every 5 min
         self.background_count += 1
         if self.background_count < 5:
             return

@@ -156,6 +156,7 @@ class Bismuth:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+
     @commands.command(name='tip', brief="Tip a user, default 1 bis, min 0.1, max 50 BIS", pass_context=True)
     async def tip(self, ctx, who_to_tip: discord.Member, amount: str='1'):
         try:
@@ -296,9 +297,6 @@ class Bismuth:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down@commands.command(name='rain', brief="Distribute a given amount between n users", pass_context=True)
-
-
-
 
     @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)
     async def withdraw(self, ctx, address:str, amount: str, message: str=''):
