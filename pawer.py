@@ -12,7 +12,7 @@ from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
-from modules.config import CONFIG, EMOJIS
+from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 
 __version__ = '0.60'
@@ -43,23 +43,9 @@ async def on_ready():
 @client.event
 async def on_message(message):
     """Called when a message is created and sent to a server."""
-    if message.content.startswith('pawer '):
-        message.content = message.content.replace('pawer', 'Pawer')
-    if message.content.startswith('!tip'):
-        message.content = message.content.replace('!tip', 'Pawer tip')
-    if message.content.startswith('!Tip'):
-        message.content = message.content.replace('!Tip', 'Pawer tip')
-
-    if message.content.startswith('!rain'):
-        message.content = message.content.replace('!rain', 'Pawer rain')
-    if message.content.startswith('!Rain'):
-        message.content = message.content.replace('!Rain', 'Pawer rain')
-
-    if message.content.startswith('Pawer hn'):
-        message.content = message.content.replace('Pawer hn', 'Pawer hypernode')
-
-    if message.content.startswith('Pawer dragg help'):
-        message.content = message.content.replace('Pawer dragg help', 'Pawer help dragg')
+    for search, replace in SHORTCUTS.items():
+        if message.content.startswith(search):
+            message.content = message.content.replace(search, replace)
 
     if not message.content.startswith(BOT_PREFIX):
         # Not for us
