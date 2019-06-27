@@ -81,8 +81,9 @@ class Bismuth:
         # TODO: cache
         url = "https://api.coingecko.com/api/v3/coins/bismuth/tickers"
         api = await async_get(url, is_json=True)
+        sorted_api = sorted(api["tickers"], key=lambda ticker: ticker["market"]["identifier"] + " " + ticker["target"])
         prices = []
-        for market in api["tickers"]:
+        for market in sorted_api:
             if market["market"]["identifier"] in MARKETS:
                 if market["target"] == "BTC":
                     prices.append("▸ {:0.8f} BTC or {:0.3f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
