@@ -15,7 +15,7 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS
 from modules.helpers import User
 
-__version__ = '0.58'
+__version__ = '0.60'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
