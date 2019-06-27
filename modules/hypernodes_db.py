@@ -74,7 +74,7 @@ class HypernodesDb:
         stopped_nodes = self.cursor.fetchall()
         for node in stopped_nodes:
             member = get(bot.get_all_members(), id=node[0])
-            await self.safe_send_message(member, "hypernode {} just stopped, you should check what append"
+            await self.safe_send_message(member, "hypernode {} just stopped, you should check what happened"
                                          .format(node[1]), bot)
 
     def get_list(self, user_id):

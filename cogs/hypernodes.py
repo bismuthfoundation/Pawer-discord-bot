@@ -99,24 +99,21 @@ class Hypernodes:
         return hn_height
 
     @hypernode.command(name='watch', brief="Add an HN to the watch list and warn via PM when down", pass_context=True)
-    async def watch(self, ctx, hypernode: str = ''):
+    async def watch(self, ctx, *hypernodes):
         """Adds a hn to watch, print the current list"""
         try:
             user = User(ctx.message.author.id)
             # user_info = user.info()
             msg = ''
-            if hypernode:
-                hn_status = await self._hn_status()
-                if hypernode not in hn_status:
-                    # unknown ip
-                    msg = "No known Hypernode with ip {}".format(hypernode)
-                    em = discord.Embed(description=msg, colour=discord.Colour.red())
-                    em.set_author(name="Error")
-                    await self.bot.say(embed=em)
-                    return
-                # add the hn to the list
-                self.bot.hypernodes_module.watch(user._user_id, hypernode)
-                msg = "Added {}\n".format(hypernode)
+            for hypernode in hypernodes:
+                if hypernode:
+                    hn_status = await self._hn_status()
+                    if hypernode not in hn_status:
+                        # unknown ip
+                        msg += "No known Hypernode with ip {}\n".format(hypernode)
+                    else:
+                        self.bot.hypernodes_module.watch(user._user_id, hypernode)
+                        msg += "Added {}\n".format(hypernode)
             """
             watch_list = await self.hn_watch_list(user_info, for_print=True)
             msg += watch_list
@@ -131,13 +128,14 @@ class Hypernodes:
             print(exc_type, fname, exc_tb.tb_lineno)
 
     @hypernode.command(name='unwatch', brief="Removes an HN from the watch list", pass_context=True)
-    async def unwatch(self, ctx, hypernode: str = ''):
+    async def unwatch(self, ctx, *hypernodes):
         """Adds a hn to watch, print the current list"""
         user = User(ctx.message.author.id)
         msg = ''
-        if hypernode:
-            self.bot.hypernodes_module.unwatch(user._user_id, hypernode)
-            msg = "Removed {}\n".format(hypernode)
+        for hypernode in hypernodes:
+            if hypernode:
+                self.bot.hypernodes_module.unwatch(user._user_id, hypernode)
+                msg += "Removed {}\n".format(hypernode)
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="Hypernodes:")
         await self.bot.say(embed=em)
@@ -151,7 +149,7 @@ class Hypernodes:
         hn_list = self.bot.hypernodes_module.get_list(user._user_id)
         hn_height = [(status[1], status[6]) for status in hn_status.values() if (status[1],) in hn_list]
         for hn in hn_height:
-            msg += "▸ {}:   {}".format(hn[0], hn[1])
+            msg += "▸ {}:   {}\n".format(hn[0], hn[1])
 
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="You are watching:")
