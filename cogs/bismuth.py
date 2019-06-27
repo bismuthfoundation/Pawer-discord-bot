@@ -85,11 +85,11 @@ class Bismuth:
         for market in api["tickers"]:
             if market["market"]["identifier"] in MARKETS:
                 if market["target"] == "BTC":
-                    prices.append("▸ {:0.8f} BTC or {:0.2f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
+                    prices.append("▸ {:0.8f} BTC or {:0.3f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
                 if market["target"] == "ETH":
-                    prices.append("▸ {:0.8f} ETH or {:0.2f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
+                    prices.append("▸ {:0.8f} ETH or {:0.3f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
                 if market["target"] == "USDT":
-                    prices.append("▸ {:0.8f} USDT or {:0.2f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
+                    prices.append("▸ {:0.8f} USDT or {:0.3f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
         prices = "\n".join(prices)
         # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
         await self.bot.say("{} price is:\n{}".format(EMOJIS['Bismuth'], prices))
