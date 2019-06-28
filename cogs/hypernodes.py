@@ -183,9 +183,9 @@ class Hypernodes:
         await self.bot.say(msg)
 
     async def background_task(self):
-        # Only run every 5 min
+        # Only run every 6 min
         self.background_count += 1
-        if self.background_count < 5:
+        if self.background_count < 6:
             return
         self.background_count = 0
 

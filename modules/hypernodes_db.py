@@ -73,13 +73,13 @@ class HypernodesDb:
         self.db.commit()
 
     async def get_nodes_status(self, bot):
-        self.cursor.execute("select user_id, users_info.ip from users_info join nodes_info where"
+        self.cursor.execute("select user_id, users_info.ip, description from users_info join nodes_info where"
                             " users_info.ip=nodes_info.ip and status=1110")
         stopped_nodes = self.cursor.fetchall()
         for node in stopped_nodes:
             member = get(bot.get_all_members(), id=node[0])
-            await self.safe_send_message(member, "hypernode {} just stopped, you should check what happened"
-                                         .format(node[1]), bot)
+            await self.safe_send_message(member, "hypernode {} ({}) just stopped, you should check what happened"
+                                         .format(node[1], node[2]).replace(" () ", ""), bot)
 
     def get_list(self, user_id):
         self.cursor.execute("SELECT distinct(ip), description FROM users_info WHERE user_id=?", (user_id,))
