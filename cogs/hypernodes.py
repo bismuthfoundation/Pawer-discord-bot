@@ -171,7 +171,8 @@ class Hypernodes:
         if len(hn_height) > 1:
             msg += "s"
         msg += "\n"
-        for hn in hn_height:
+
+        for index, hn in enumerate(hn_height):
             char = "-"
             if hn[1] <= 0:
                 char = "▸"
@@ -179,6 +180,9 @@ class Hypernodes:
             if hn[1] <= 0:
                 text = "**" + text + "**"
             msg += text+"\n"
+            if not (index + 1) % 20:
+                await self.bot.say(msg)
+                msg = ""
 
         await self.bot.say(msg)
 

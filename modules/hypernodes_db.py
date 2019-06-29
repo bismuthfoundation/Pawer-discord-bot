@@ -79,7 +79,7 @@ class HypernodesDb:
         for node in stopped_nodes:
             member = get(bot.get_all_members(), id=node[0])
             await self.safe_send_message(member, "hypernode {} ({}) just stopped, you should check what happened"
-                                         .format(node[1], node[2]).replace(" () ", ""), bot)
+                                         .format(node[1], node[2]).replace(" () ", " "), bot)
 
     def get_list(self, user_id):
         self.cursor.execute("SELECT distinct(ip), description FROM users_info WHERE user_id=?", (user_id,))
