@@ -119,6 +119,7 @@ class Dragginator:
         em.set_author(name="Get an egg with Bis")
         await self.bot.say(embed=em)
 
+    """ 
     @dragg.command(name='claim', brief="Claim a free egg for the advent calendar, only if you already have an egg",
                    pass_context=True)
     async def claim(self, ctx):
@@ -150,6 +151,7 @@ class Dragginator:
         em = discord.Embed(description=msg, colour=colour)
         em.set_author(name="Advent calendar")
         await self.bot.say(embed=em)
+    """
 
     @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users (cost 3 bis per user)",
                    pass_context=True)
@@ -240,6 +242,42 @@ class Dragginator:
         user_info = user.info()
         data = await async_get(
             "https://dragginator.com/api/pawer/cup_api.php?address={}".format(user_info['address']), is_json=True)
+        em = discord.Embed(description=data["message"], colour=discord.Colour.green())
+        em.set_author(name=data["title"])
+        await self.bot.say(embed=em)
+
+    @dragg.command(name='leagues', brief="Give informations about the leagues", pass_context=True)
+    async def leagues(self, ctx, *dna):
+        user = User(ctx.message.author.id)
+        user_info = user.info()
+        if len(dna) and dna[0] == "register":
+
+            result = user.send_bis_to(0, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf", data=dna[1],
+                                      operation="dragg:leagues", check_balance=True)
+
+            if result["txid"]:
+                em = discord.Embed(description="The Dna is now registered!\n Txid: {}".format(result["txid"]),
+                                   colour=discord.Colour.green())
+            elif result["error"] == "LOW_BALANCE":
+                em = discord.Embed(
+                    description="Sorry, but you don't have enough Bis to afford the fees", colour=discord.Colour.red())
+            elif result["error"] == "NO_WALLET":
+                em = discord.Embed(description="Sorry, but you have to create a wallet first: type `Pawer deposit`",
+                                   colour=discord.Colour.red())
+            else:
+                em = discord.Embed(description="Something went wrong, Try again to see what append",
+                                   colour=discord.Colour.red())
+
+            em.set_author(name="")
+            await self.bot.say(embed=em)
+            return
+        if len(dna):
+            dna = dna[0]
+        else:
+            dna = ""
+        data = await async_get(
+            "https://dragginator.com/api/pawer/leagues_api.php?address={}&dna={}".format(user_info['address'], dna),
+            is_json=True)
         em = discord.Embed(description=data["message"], colour=discord.Colour.green())
         em.set_author(name=data["title"])
         await self.bot.say(embed=em)
