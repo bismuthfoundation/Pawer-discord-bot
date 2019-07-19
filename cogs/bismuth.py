@@ -227,6 +227,9 @@ class Bismuth:
             total_amount = float(total_amount)
             how_many_users = int(how_many_users)
 
+            if total_amount < 0 or how_many_users < 0:
+                return
+
             if how_many_users > 100:
                 how_many_users = 100
             if how_many_users < 1:
