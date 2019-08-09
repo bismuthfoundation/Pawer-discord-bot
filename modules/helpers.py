@@ -128,6 +128,7 @@ class User:
         try:
             status['server'] = BISMUTH_CLIENT.current_server
             status['supply'] = BismuthUtil.height_to_supply(status['blocks'])
+            status['last_block'] = BISMUTH_CLIENT.command("blocklast")
         except:
             pass
         return status

@@ -124,7 +124,8 @@ class Bismuth:
         msg += "Protocol      : {} \n".format(status['protocolversion'])
         msg += "Node version  : {} \n".format(status['walletversion'])
         msg += "Consensus     : {}  ({:0.2f}%)\n".format(status['consensus'], status['consensus_percent'])
-        msg += "Difficulty    : {} \n".format(status['difficulty'])
+        msg += "Difficulty    : {:0.2f} \n".format(status['difficulty'])
+        msg += "Block reward  : {:0.5f} \n".format(status['last_block'][9])
         msg += "Connections   : {} \n".format(status['connections'])
         # msg += "Time of info  : {} \n".format(status['difficulty'])
         if 'extended' in status:
