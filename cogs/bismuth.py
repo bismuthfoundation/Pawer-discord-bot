@@ -349,7 +349,7 @@ class Bismuth:
             await self.bot.say("Error {}".format(e))
 
     @commands.command(name='zirco', brief="Play ZircoDice from your pawer wallet, with any amount less than 100 along with your bet ", pass_context=True)
-    async def withdraw(self, ctx, amount: str, bet: str):
+    async def zirco(self, ctx, amount: str, bet: str):
         try:
             amount = float(amount)
             zirco_service_address = '340c195f768be515488a6efedb958e135150b2ef3e53573a7017ac7d'
