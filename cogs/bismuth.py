@@ -348,7 +348,7 @@ class Bismuth:
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
             await self.bot.say("Error {}".format(e))
 
-    @commands.command(name='zirco', brief="Play ZircoDice from your pawer wallet, with any amount<100 along with your bet ", pass_context=True)
+    @commands.command(name='zirco', brief="Play ZircoDice from your pawer wallet, with any amount less than 100 along with your bet ", pass_context=True)
     async def withdraw(self, ctx, amount: str, bet: str):
         try:
             amount = float(amount)
@@ -360,14 +360,14 @@ class Bismuth:
             if bet.lower() not in ('odd', 'even'):
                 print("OpenField data error")
                 await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Your bet does not look ok. Command is `Pawer zirco <amount> [odd/even]`")
+                await self.bot.say("Your bet does not look ok. Command is `Pawer zirco <amount> <odd/even>`")
                 return
 
             # Check the bet amount
             if (amount - float(100)) > 0.01 :
                 print("Bet amount too high")
                 await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("You are betting too high. Recommended amount<100`")
+                await self.bot.say("You are betting too high. Recommended amount is less than 100`")
                 return
 
             if user_info and user_info['address']:
