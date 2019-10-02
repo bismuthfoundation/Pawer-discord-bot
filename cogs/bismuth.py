@@ -374,10 +374,10 @@ class Bismuth:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                msg = "{} zirco {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
                 fees = BismuthUtil.fee_for_tx(bet)
                 print(msg)
-                if balance < amount + 0.01:
+                if balance < amount + 0.01004:
                     print("balance too low")
                     await self.bot.add_reaction(ctx.message, '😟')
                     await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
@@ -393,10 +393,6 @@ class Bismuth:
                     await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
                     await self.bot.say("Can't place your bet. Error {}".format(send['error']))
                 return
-            # Depending on channel, say or send PM
-            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
-            em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
