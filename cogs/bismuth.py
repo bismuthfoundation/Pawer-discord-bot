@@ -448,7 +448,7 @@ class Bismuth:
             await self.bot.say("Error {}".format(e))
 
     @commands.command(name='freebismuth', brief="Register your #Bismuth tweet and get free bismuth", pass_context=True)
-    async def freebismuth(self, ctx, tweet: str):
+    async def freebismuth(self, ctx, tweet_url: str):
         # TODO: too much code in common with operation, factorize somehow.
         try:
             amount = float(0)  # amount has to be 0
@@ -459,21 +459,21 @@ class Bismuth:
 
             #validate tweet url.
             # TODO: Validate tweet likes and retweets as per freebismuth spec
-            if not validators.url(tweet):
+            if not validators.url(tweet_url):
                 print("tweet url error")
                 await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Link to the tweet does not look ok. Command is `Pawer freebismuth <tweet>`")
+                await self.bot.say("Link to the tweet does not look ok. Command is `Pawer freebismuth <tweet_url>`")
                 return
 
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                tweet_id = tweet.split('/')[-1]  # Extract tweet ID
+                tweet_id = tweet_url.split('/')[-1]  # Extract tweet ID
                 msg = "{} freebismuth, tweet ID is {} ".format(ctx.message.author.display_name, tweet_id)
-                fees = BismuthUtil.fee_for_tx(tweet)
+                fees = BismuthUtil.fee_for_tx(tweet_id)
                 print(msg)
-                if balance < amount + 0.01:
+                if balance < amount + fees:
                     print("balance too low")
                     await self.bot.add_reaction(ctx.message, '😟')
                     await self.bot.say("Not enough balance to cover fee ({} Fees)".format(fees))
