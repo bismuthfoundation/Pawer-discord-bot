@@ -635,7 +635,7 @@ class Bismuth:
 
     @commands.command(name='graph', brief="Shows bismuth graphs: pools, diff, blocktime, hypernodes", pass_context=True)
     async def graph(self, ctx, type=''):
-        urls = {'pools': ["Bismuth Pools estimated hashrate", 'https://hypernodes.bismuth.live/plots/hr.php'],
+        urls = {'pools': ["Bismuth Pools estimated hashrate", 'https://hypernodes.bismuth.live/plots/hr.php?col=1'],
                 'diff': ["Mainnet difficulty evolution", 'https://hypernodes.bismuth.live/plots/mainnet/diff.php'],
                 'hypernodes': ["Number of 10k equivalent HN per round", 'https://hypernodes.bismuth.live/plots/posnet/weight.php'],
                 'blocktime': ["Mainnnet blocktime evolution", 'https://hypernodes.bismuth.live/plots/mainnet/blocktime.php']}
