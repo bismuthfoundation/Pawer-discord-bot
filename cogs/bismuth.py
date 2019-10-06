@@ -16,6 +16,7 @@ from bismuthclient.bismuthutil import BismuthUtil
 from random import shuffle
 from modules.stats import Tips
 import validators
+import re
 """
 Potential todo:
     play paper / rock / scissor
@@ -469,7 +470,7 @@ class Bismuth:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                tweet_id = tweet_url.split('/')[-1]  # Extract tweet ID
+                tweet_id = re.search('/status/(\d+)', tweet_url).group(1)  # Extract tweet ID
                 msg = "{} freebismuth, tweet ID is {} ".format(ctx.message.author.display_name, tweet_id)
                 fees = BismuthUtil.fee_for_tx(tweet_id)
                 print(msg)

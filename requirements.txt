@@ -3,3 +3,4 @@ discord.py==0.16.12
 requests
 BismuthClient>=0.0.44
 validators
+re
