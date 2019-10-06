@@ -164,3 +164,32 @@ Defines an optional label for a hypernode you're currently watching. That label 
 
 Ex: `Pawer hypernode label 1.2.3.4 My first Hypernode rocks!`  
 Ex: `Pawer hn label 3.4.5.6 My second Hypernode is awesome`
+
+
+## Dapp integrated commands
+
+### zirco
+
+*amount*
+*bet*
+
+Play ZircoDice from pawer wallet. For more info vist : [ZircoDice](http://bismuth.live:1212/)
+
+Note:
+
+- *amount* is limited to 100 $bis per bet as per [ZircoDice](http://bismuth.live:1212/) spec
+- *bet* can either be `odd` or `even`
+
+Ex: `Pawer zirco 10 odd`
+
+### freebismuth
+
+*tweet_url*
+
+Register your #Bismuth tweet and get free $bis from [@freebismuth](https://twitter.com/freebismuth) twitter bot.
+
+Note:
+
+- *tweet_url* must use #Bismuth and \$bis and get minimum likes and retweets as per [@freebismuth](https://twitter.com/freebismuth) spec.
+
+Ex: `Pawer freebsimuth https://twitter.com/freebismuth/status/1000356670151766016`
