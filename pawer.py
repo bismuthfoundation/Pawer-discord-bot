@@ -52,8 +52,7 @@ async def on_message(message):
         # Not for us
         return
     if client.user.id != message.author.id:  # check not a bot message
-        print("Got {} from {}".format(
-            message.content, message.author.display_name))
+        print("Got {} from {}".format(message.content, message.author.display_name))
     if 'help' in message.content:  # swap help and command accordingly
         help_command_regex = re.compile(r'(%s)(.*)(%s)' % ('Pawer', ' help'))
         message.content = help_command_regex.sub(r'\1\3\2', message.content)
@@ -77,8 +76,7 @@ async def on_message(message):
             # only here, will process commands
             await client.process_commands(message)
         finally:
-            # Hourglass
-            await client.remove_reaction(message, '⏳', client.user)
+            await client.remove_reaction(message, '⏳', client.user)  # Hourglass
 
 
 async def eligibility(message):
