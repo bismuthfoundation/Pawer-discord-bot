@@ -3,6 +3,7 @@ Pawer Discord Bot for Bismuth Cryptocurrency
 """
 
 import asyncio
+import re
 
 from discord.ext import commands
 from discord.utils import get
@@ -51,7 +52,11 @@ async def on_message(message):
         # Not for us
         return
     if client.user.id != message.author.id:  # check not a bot message
-        print("Got {} from {}".format(message.content, message.author.display_name))
+        print("Got {} from {}".format(
+            message.content, message.author.display_name))
+    if 'help' in message.content:  # swap help and command accordingly
+        help_command_regex = re.compile(r'(%s)(.*)(%s)' % ('Pawer', ' help'))
+        message.content = help_command_regex.sub(r'\1\3\2', message.content)
     if message.content.startswith('Pawer tip'):
         #  Exception
         await client.process_commands(message)
@@ -72,7 +77,8 @@ async def on_message(message):
             # only here, will process commands
             await client.process_commands(message)
         finally:
-            await client.remove_reaction(message, '⏳', client.user)  # Hourglass
+            # Hourglass
+            await client.remove_reaction(message, '⏳', client.user)
 
 
 async def eligibility(message):
