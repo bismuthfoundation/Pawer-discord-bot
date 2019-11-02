@@ -53,9 +53,10 @@ async def on_message(message):
         return
     if client.user.id != message.author.id:  # check not a bot message
         print("Got {} from {}".format(message.content, message.author.display_name))
-    if 'help' in message.content:  # swap help and command accordingly
-        help_command_regex = re.compile(r'(%s)(.*)(%s)' % ('Pawer', ' help'))
-        message.content = help_command_regex.sub(r'\1\3\2', message.content)
+    is_help_command = re.search(r'Pawer \w+ help', message.content)
+    if is_help_command:
+        # swap 'help' and 'command' accordingly
+        message.content = re.sub(r'(%s)(.*)(%s)' % ('Pawer', ' help'), r'\1\3\2', message.content)
     if message.content.startswith('Pawer tip'):
         #  Exception
         await client.process_commands(message)
