@@ -681,9 +681,9 @@ class Bismuth:
                 bet_info = json.loads(result)
                 try:
                     if bet_info["victorious"] == 1:
-                        await self.safe_send_message(sender, "Hurrah! You've won the bet worth {}bis.".format(bet_info["amount"]))
+                        await self.safe_send_message(sender, "Hurrah! You've won the bet worth {}{}.".format(bet_info["amount"], EMOJIS['Bismuth']))
                     else:
-                        await self.safe_send_message(sender, "You've lost the bet worth {}bis. Hard luck!".format(bet_info["amount"]))
+                        await self.safe_send_message(sender, "You've lost the bet worth {}{}. Hard luck!".format(bet_info["amount"], EMOJIS['Bismuth']))
                 except:
                     pass
                 return
