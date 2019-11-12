@@ -17,6 +17,7 @@ from random import shuffle
 from modules.stats import Tips
 import validators
 import re
+import asyncio
 """
 Potential todo:
     play paper / rock / scissor
@@ -391,6 +392,8 @@ class Bismuth:
                     # answer by reaction not to pollute
                     await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
                     await self.bot.say("Your bet has been placed. Txid is {}".format(txid))
+                    await self.bot.remove_reaction(ctx.message, '⏳', self.bot.user)
+                    await self.bot.loop.create_task(self.get_zirco_status(ctx.message.author, txid))
                 else:
                     await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
                     await self.bot.say("Can't place your bet. Error {}".format(send['error']))
@@ -669,3 +672,21 @@ class Bismuth:
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{} board".format(action))
         await self.bot.say(embed=em)
+
+    async def get_zirco_status(self, sender, txid):
+        timeout_counter = 0
+        while not self.bot.is_closed and timeout_counter < 10:
+            result = await async_get("http://bismuth.live:1212/txid/{}".format(txid))
+            if result != "not found":
+                bet_info = json.loads(result)
+                try:
+                    if bet_info["victorious"] == 1:
+                        await self.safe_send_message(sender, "Hurrah! You've won the bet worth {}bis.".format(bet_info["amount"]))
+                    else:
+                        await self.safe_send_message(sender, "You've lost the bet worth {}bis. Hard luck!".format(bet_info["amount"]))
+                except:
+                    pass
+                return
+            else:
+                timeout_counter += 1
+                await asyncio.sleep(60)
