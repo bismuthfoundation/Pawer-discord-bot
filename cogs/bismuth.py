@@ -674,19 +674,22 @@ class Bismuth:
         await self.bot.say(embed=em)
 
     async def get_zirco_status(self, sender, txid):
-        timeout_counter = 0
-        while not self.bot.is_closed and timeout_counter < 10:
-            result = await async_get("http://bismuth.live:1212/txid/{}".format(txid))
-            if result != "not found":
-                bet_info = json.loads(result)
-                try:
-                    if bet_info["victorious"] == 1:
-                        await self.safe_send_message(sender, "Hurrah! You've won the bet worth {}{}.".format(bet_info["amount"], EMOJIS['Bismuth']))
-                    else:
-                        await self.safe_send_message(sender, "You've lost the bet worth {}{}. Hard luck!".format(bet_info["amount"], EMOJIS['Bismuth']))
-                except:
-                    pass
-                return
-            else:
-                timeout_counter += 1
-                await asyncio.sleep(60)
+        try:
+            timeout_counter = 0
+            while not self.bot.is_closed and timeout_counter < 10:
+                result = await async_get("http://bismuth.live:1212/txid/{}".format(txid))
+                if result != "not found":
+                    bet_info = json.loads(result)
+                    try:
+                        if bet_info["victorious"] == 1:
+                            await self.safe_send_message(sender, "Hurrah! You've won the bet worth {}{}.".format(bet_info["amount"], EMOJIS['Bismuth']))
+                        else:
+                            await self.safe_send_message(sender, "You've lost the bet worth {}{}. Hard luck!".format(bet_info["amount"], EMOJIS['Bismuth']))
+                    except:
+                        pass
+                    return
+                else:
+                    timeout_counter += 1
+                    await asyncio.sleep(60)
+        except Exception as e:
+            print(str(e))
