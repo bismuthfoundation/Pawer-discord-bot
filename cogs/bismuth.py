@@ -306,9 +306,10 @@ class Bismuth:
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down@commands.command(name='rain', brief="Distribute a given amount between n users", pass_context=True)
 
     @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)
-    async def withdraw(self, ctx, address:str, amount: str, message: str=''):
+    async def withdraw(self, ctx, address:str, amount: str, *message):
         try:
             amount = float(amount)
+            openfield_data = ' '.join(filter(None, message))
             user = User(ctx.message.author.id)
             user_info = user.info()
             # Check the address looks ok
@@ -323,14 +324,14 @@ class Bismuth:
                 # Make sure balance is enough
                 balance = float(user.balance())
                 msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
-                fees = BismuthUtil.fee_for_tx(message)
+                fees = BismuthUtil.fee_for_tx(openfield_data)
                 print(msg)
                 if balance < amount + 0.01:
                     print("balance too low")
                     await self.bot.add_reaction(ctx.message, '😟')
                     await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
-                send = user.send_bis_to(amount, address, data=message)
+                send = user.send_bis_to(amount, address, data=openfield_data)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
@@ -405,10 +406,11 @@ class Bismuth:
             await self.bot.say("Can't place your bet. Error {}".format(e))
 
     @commands.command(name='operation', brief="Send a generic 'operation' transaction, with an optional message", pass_context=True)
-    async def operation(self, ctx, operation: str, address:str, amount: str,  message: str=''):
+    async def operation(self, ctx, operation: str, address:str, amount: str, *message):
         # TODO: too much code in common with withdraw, factorize somehow.
         try:
             amount = float(amount)
+            openfield_data = ' '.join(filter(None, message))
             user = User(ctx.message.author.id)
             user_info = user.info()
             # Check the address looks ok
@@ -423,14 +425,14 @@ class Bismuth:
                 # Make sure balance is enough
                 balance = float(user.balance())
                 msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
-                fees = BismuthUtil.fee_for_tx(message)
+                fees = BismuthUtil.fee_for_tx(openfield_data)
                 print(msg)
                 if balance < amount + 0.01:
                     print("balance too low")
                     await self.bot.add_reaction(ctx.message, '😟')
                     await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
-                send = user.send_bis_to(amount, address, data=message, operation=operation)
+                send = user.send_bis_to(amount, address, data=openfield_data, operation=operation)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
