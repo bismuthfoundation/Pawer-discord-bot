@@ -22,6 +22,7 @@ BOT_PREFIX = 'Pawer '
 
 client = commands.Bot(command_prefix=BOT_PREFIX)
 
+foundation_members = ['Adorid (hashpool.eu)', 'bizzzy', 'SySy', 'EggdraSyl', 'Gawlea', 'gh2', 'HCLivess', 'jimtalksdata', 'raetsch']
 
 @client.event
 async def on_ready():
@@ -38,7 +39,7 @@ async def on_ready():
     EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
     await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands "
                                                                             "didn't get an answer, just resend it.")
-
+    client.loop.create_task(monitor_impersonators())
 
 @client.event
 async def on_message(message):
@@ -126,6 +127,18 @@ async def background_task(cog_list):
             except:
                 pass
         await asyncio.sleep(60)
+
+async def monitor_impersonators():
+    await client.wait_until_ready()
+    while not client.is_closed:
+        try:
+            members = client.get_all_members()
+            for member in members:
+                if member.name in foundation_members:
+                    await client.ban(member)
+        except:
+            pass
+        await asyncio.sleep(300)
 
 
 if __name__ == '__main__':
