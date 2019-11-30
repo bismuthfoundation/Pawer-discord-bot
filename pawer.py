@@ -22,7 +22,6 @@ BOT_PREFIX = 'Pawer '
 
 client = commands.Bot(command_prefix=BOT_PREFIX)
 
-foundation_members = ['Adorid (hashpool.eu)', 'bizzzy', 'SySy', 'EggdraSyl', 'Gawlea', 'gh2', 'HCLivess', 'jimtalksdata', 'raetsch']
 
 @client.event
 async def on_ready():
@@ -128,17 +127,33 @@ async def background_task(cog_list):
                 pass
         await asyncio.sleep(60)
 
+
 async def monitor_impersonators():
     await client.wait_until_ready()
+    notified_impersonators = []
     while not client.is_closed:
         try:
-            members = client.get_all_members()
-            for member in members:
-                if member.name in foundation_members:
-                    await client.ban(member)
+            await ban_impersonators(notified_impersonators)
         except:
             pass
-        await asyncio.sleep(300)
+        await asyncio.sleep(60)
+
+
+async def ban_impersonators(notified_impersonators):
+    try:
+        members = client.get_all_members()
+        impersonators = [ member for member in members if member.name in CONFIG["foundation_members"] ]
+        for impersonator in impersonators:
+            if impersonator.name not in notified_impersonators:
+                await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
+                print('Impersonator - {} found'.format(impersonator.name))
+                notified_impersonators.append(impersonator.name)
+            if CONFIG['ban_impersonator']:
+                await client.ban(impersonator)
+                await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " banned")
+                print('Impersonator - {} banned'.format(impersonator.name))
+    except:
+        pass
 
 
 if __name__ == '__main__':
