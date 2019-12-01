@@ -142,7 +142,7 @@ async def monitor_impersonators():
 async def ban_impersonators(notified_impersonators):
     try:
         members = client.get_all_members()
-        impersonators = [ member for member in members if member.name in CONFIG["foundation_members"] ]
+        impersonators = [ member for member in members if member.name in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
