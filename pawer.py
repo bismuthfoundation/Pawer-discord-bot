@@ -39,7 +39,7 @@ async def on_ready():
     EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
     await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands "
                                                                             "didn't get an answer, just resend it.")
-
+    client.loop.create_task(monitor_impersonators())
 
 @client.event
 async def on_message(message):
@@ -131,6 +131,34 @@ async def background_task(cog_list):
             except:
                 pass
         await asyncio.sleep(60)
+
+
+async def monitor_impersonators():
+    await client.wait_until_ready()
+    notified_impersonators = []
+    while not client.is_closed:
+        try:
+            await ban_impersonators(notified_impersonators)
+        except:
+            pass
+        await asyncio.sleep(60)
+
+
+async def ban_impersonators(notified_impersonators):
+    try:
+        members = client.get_all_members()
+        impersonators = [ member for member in members if member.name in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
+        for impersonator in impersonators:
+            if impersonator.name not in notified_impersonators:
+                await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
+                print('Impersonator - {} found'.format(impersonator.name))
+                notified_impersonators.append(impersonator.name)
+            if CONFIG['ban_impersonator']:
+                await client.ban(impersonator)
+                await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " banned")
+                print('Impersonator - {} banned'.format(impersonator.name))
+    except:
+        pass
 
 
 if __name__ == '__main__':
