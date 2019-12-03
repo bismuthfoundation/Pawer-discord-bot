@@ -136,6 +136,8 @@ async def background_task(cog_list):
 async def monitor_impersonators():
     await client.wait_until_ready()
     notified_impersonators = []
+    # Make sure config is lowercase - this becomes a set, therefore unique names.
+    CONFIG["foundation_members"] = { name.lower() for name in CONFIG["foundation_members"] }
     while not client.is_closed:
         try:
             await ban_impersonators(notified_impersonators)
@@ -151,7 +153,7 @@ async def ban_impersonators(notified_impersonators):
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
-                print('Impersonator - {} found'.format(impersonator.name))
+                print('Impersonator - {} found - Out of {} Total members'.format(impersonator.name, len(members)))
                 notified_impersonators.append(impersonator.name)
             if CONFIG['ban_impersonator']:
                 await client.ban(impersonator)
