@@ -16,7 +16,7 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 
-__version__ = '0.61'
+__version__ = '0.62'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -137,7 +137,8 @@ async def monitor_impersonators():
     await client.wait_until_ready()
     notified_impersonators = []
     # Make sure config is lowercase - this becomes a set, therefore unique names.
-    CONFIG["foundation_members"] = { name.lower() for name in CONFIG["foundation_members"] }
+    CONFIG["foundation_members"] = { name.lower().strip() for name in CONFIG["foundation_members"] }
+    print("Foundation list", CONFIG["foundation_members"])
     while not client.is_closed:
         try:
             await ban_impersonators(notified_impersonators)
@@ -149,7 +150,7 @@ async def monitor_impersonators():
 async def ban_impersonators(notified_impersonators):
     try:
         members = client.get_all_members()
-        impersonators = [ member for member in members if member.name.lower() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
+        impersonators = [ member for member in members if member.name.lower().strip() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
