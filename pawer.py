@@ -156,7 +156,7 @@ async def ban_impersonators(notified_impersonators):
         CHECKING_BANS = True
         print("Checking bans...")
         start = time()
-        members = client.get_all_members()
+        members = list(client.get_all_members())  # convert generator to list, we need all anyway.
         impersonators = [ member for member in members if member.name.lower().strip() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
         print("{} members, {} impersonators, {} sec". format(len(members), len(impersonators), time() - start))
         for impersonator in impersonators:
