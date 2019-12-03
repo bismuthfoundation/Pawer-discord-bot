@@ -168,7 +168,7 @@ async def ban_impersonators(notified_impersonators):
                 await client.ban(impersonator)
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " banned")
                 print('Impersonator - {} banned'.format(impersonator.name))
-    except:
+    except Exception as e:
         print("Exception ban_impersonators", str(e))
     finally:
         CHECKING_BANS = False
