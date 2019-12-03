@@ -4,6 +4,7 @@ Pawer Discord Bot for Bismuth Cryptocurrency
 
 import asyncio
 import re
+from time import time
 
 from discord.ext import commands
 from discord.utils import get
@@ -16,12 +17,14 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 
-__version__ = '0.62'
+__version__ = '0.63'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
 
 client = commands.Bot(command_prefix=BOT_PREFIX)
+
+CHECKING_BANS = False
 
 
 @client.event
@@ -140,17 +143,22 @@ async def monitor_impersonators():
     CONFIG["foundation_members"] = { name.lower().strip() for name in CONFIG["foundation_members"] }
     print("Foundation list", CONFIG["foundation_members"])
     while not client.is_closed:
-        try:
-            await ban_impersonators(notified_impersonators)
-        except:
-            pass
+        await ban_impersonators(notified_impersonators)  # that method can't raise an exception
         await asyncio.sleep(60)
 
 
 async def ban_impersonators(notified_impersonators):
+    global CHECKING_BANS
+    if CHECKING_BANS:
+        # Avoid re-entrance.
+        return
     try:
+        CHECKING_BANS = True
+        print("Checking bans...")
+        start = time()
         members = client.get_all_members()
         impersonators = [ member for member in members if member.name.lower().strip() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
+        print("{} members, {} impersonators, {} sec". format(len(members), len(impersonators), time() - start))
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
@@ -161,7 +169,9 @@ async def ban_impersonators(notified_impersonators):
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " banned")
                 print('Impersonator - {} banned'.format(impersonator.name))
     except:
-        pass
+        print("Exception ban_impersonators", str(e))
+    finally:
+        CHECKING_BANS = False
 
 
 if __name__ == '__main__':
