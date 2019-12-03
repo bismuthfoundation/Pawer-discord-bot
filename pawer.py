@@ -16,7 +16,7 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 
-__version__ = '0.60'
+__version__ = '0.61'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -147,7 +147,7 @@ async def monitor_impersonators():
 async def ban_impersonators(notified_impersonators):
     try:
         members = client.get_all_members()
-        impersonators = [ member for member in members if member.name in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
+        impersonators = [ member for member in members if member.name.lower() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
