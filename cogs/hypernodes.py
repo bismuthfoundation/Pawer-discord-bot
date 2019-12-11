@@ -186,6 +186,32 @@ class Hypernodes:
 
         await self.bot.say(msg)
 
+    @hypernode.command(name='recover', brief="recovers your watch list", pass_context=True)
+    async def recover(self, ctx, *hypernodes):
+        """recovers the watch list"""
+
+        hypernodes = " ".join(hypernodes)
+        hypernodes = hypernodes.replace("▸", "-")
+        hypernodes = hypernodes.split("-")
+
+        ips = []
+        labels = {}
+
+        for hypernode in hypernodes:
+            if "You are watching" in hypernode:
+                continue
+            ip, label = hypernode.split("|")
+            ip = ip.split(" ")[1]
+            label = label[1:]
+            print("recovering", ip, label)
+            ips.append(ip)
+            labels[ip] = label
+        await self.watch.callback(self, ctx, *ips)
+        for ip, label in labels.items():
+            await self.label.callback(self, ctx, ip, label)
+
+
+
     async def background_task(self):
         # Only run every 6 min
         self.background_count += 1

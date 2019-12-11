@@ -43,7 +43,7 @@ class HypernodesDb:
 
     async def update_nodes_status(self, hypernodes_data, bot):
         self.cursor.execute("select user_id, users_info.ip from users_info join nodes_info where"
-                            " users_info.ip=nodes_info.ip and timestamp < ?", (int(time.time() - 4.1 * 60 * 5),))
+                            " users_info.ip=nodes_info.ip and timestamp < ?", (int(time.time() - 4.1 * 60 * 5 * 100),))
         removed_nodes = self.cursor.fetchall()
         ip_list = "("
         for node in removed_nodes:
@@ -55,7 +55,7 @@ class HypernodesDb:
             ip_list = ip_list[:-1]
         ip_list += ")"
         self.cursor.execute("DELETE FROM users_info WHERE ip in {}".format(ip_list))
-        self.cursor.execute("DELETE FROM nodes_info WHERE timestamp < ?", (int(time.time() - 4.1 * 60 * 5),))
+        self.cursor.execute("DELETE FROM nodes_info WHERE timestamp < ?", (int(time.time() - 4.1 * 60 * 5 * 100),))
         self.db.commit()
         self.cursor.execute("SELECT distinct(ip) FROM users_info")
         ips = self.cursor.fetchall()
