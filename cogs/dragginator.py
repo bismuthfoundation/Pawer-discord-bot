@@ -241,7 +241,7 @@ class Dragginator:
         user = User(ctx.message.author.id)
         user_info = user.info()
         data = await async_get(
-            "https://dragginator.com/api/pawer/cup_api.php?address={}".format(user_info['address']), is_json=True)
+            "https://dragginator.com/api/cup/address/?address={}?raw=1".format(user_info['address']), is_json=True)
         em = discord.Embed(description=data["message"], colour=discord.Colour.green())
         em.set_author(name=data["title"])
         await self.bot.say(embed=em)
