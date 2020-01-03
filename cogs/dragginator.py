@@ -258,14 +258,12 @@ class Dragginator:
 
             if user_info and user_info['address']:
                 data = await async_get(
-                    "https://dragginator.com/api/cup/register/{}/?raw=1".format(dna), is_json=False)
-                data = eval(data)
+                    "https://dragginator.com/api/cup/register/{}/?raw=1".format(dna), is_json=True)
                 res = user.sign_message(data["message"])
                 signed = res['sign']
                 if signed:
                     data = await async_get(
-                        "https://dragginator.com/api/cup/register/{}/{}/{}/?raw=1".format(dna, data["cup"], signed), is_json=False)
-                    data = eval(data)
+                        "https://dragginator.com/api/cup/register/{}/{}/{}/?raw=1".format(dna, data["cup"], signed), is_json=True)
                     if not data["signature_result"]:
                         message = "Invalid signature! Are you sure you own this dna?"
                     else:
