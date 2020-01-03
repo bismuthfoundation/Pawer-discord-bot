@@ -241,9 +241,47 @@ class Dragginator:
         user = User(ctx.message.author.id)
         user_info = user.info()
         data = await async_get(
-            "https://dragginator.com/api/cup/address/?address={}?raw=1".format(user_info['address']), is_json=True)
+            "https://dragginator.com/api/cup/address/?address={}&raw=1".format(user_info['address']), is_json=True)
         em = discord.Embed(description=data["message"], colour=discord.Colour.green())
         em.set_author(name=data["title"])
+        await self.bot.say(embed=em)
+
+    @dragg.command(name='register', brief="Registers a dna to the cup", pass_context=True)
+    async def register(self, ctx, *dna):
+        message = ""
+        title = "Registering {}".format(dna)
+        if dna:
+            dna = dna[0]
+            title = "Registering {}".format(dna)
+            user = User(ctx.message.author.id)
+            user_info = user.info()
+
+            if user_info and user_info['address']:
+                data = await async_get(
+                    "https://dragginator.com/api/cup/register/{}/?raw=1".format(dna), is_json=False)
+                data = eval(data)
+                res = user.sign_message(data["message"])
+                signed = res['sign']
+                if signed:
+                    data = await async_get(
+                        "https://dragginator.com/api/cup/register/{}/{}/{}/?raw=1".format(dna, data["cup"], signed), is_json=False)
+                    data = eval(data)
+                    if not data["signature_result"]:
+                        message = "Invalid signature! Are you sure you own this dna?"
+                    else:
+                        if data["can_join_cup"]:
+                            message = "Dna successfuly registered!"
+                        else:
+                            message = "This dna can't join this cup."
+                else:
+                    message = "Failed to sign the message."
+            else:
+                message = "You don't have a pawer account yet."
+        else:
+            message = "Usage: Pawer dragg register a_dna_you_own"
+
+        em = discord.Embed(description=message, colour=discord.Colour.green())
+        em.set_author(name=title)
         await self.bot.say(embed=em)
 
     @dragg.command(name='leagues', brief="Give informations about the leagues", pass_context=True)
