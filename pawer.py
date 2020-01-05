@@ -185,7 +185,7 @@ async def ban_scammers():
         print("Checking scammers...")
         start = time()
         members = list(client.get_all_members())
-        scammers = [ member for member in members for prefix in CONFIG["scammer_prefixes"] if prefix.lower() in member.display_name.lower() ]
+        scammers = [ member for member in members for prefix in CONFIG["scammer_keywords"] if prefix.lower() in member.display_name.lower() ]
         print("{} members, {} scammers, {} sec". format(len(members), len(scammers), time() - start))
         for scammer in scammers:
             await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " will be banned")
