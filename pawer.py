@@ -139,16 +139,17 @@ async def background_task(cog_list):
 async def monitor_impersonators():
     await client.wait_until_ready()
     notified_impersonators = []
+    guild_members = list(client.get_all_members())
     # Make sure config is lowercase - this becomes a set, therefore unique names.
     CONFIG["foundation_members"] = { name.lower().strip() for name in CONFIG["foundation_members"] }
     print("Foundation list", CONFIG["foundation_members"])
     while not client.is_closed:
-        await ban_impersonators(notified_impersonators)  # that method can't raise an exception
-        await ban_scammers()
+        await ban_impersonators(notified_impersonators, guild_members)  # that method can't raise an exception
+        await ban_scammers(guild_members)
         await asyncio.sleep(60)
 
 
-async def ban_impersonators(notified_impersonators):
+async def ban_impersonators(notified_impersonators, guild_members):
     global CHECKING_BANS
     if CHECKING_BANS:
         # Avoid re-entrance.
@@ -157,13 +158,12 @@ async def ban_impersonators(notified_impersonators):
         CHECKING_BANS = True
         print("Checking bans...")
         start = time()
-        members = list(client.get_all_members())  # convert generator to list, we need all anyway.
-        impersonators = [ member for member in members if member.name.lower().strip() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
-        print("{} members, {} impersonators, {} sec". format(len(members), len(impersonators), time() - start))
+        impersonators = [ member for member in guild_members if member.name.lower().strip() in CONFIG["foundation_members"] and member.id not in CONFIG["admin_ids"] ]
+        print("{} members, {} impersonator(s), {} sec". format(len(guild_members), len(impersonators), time() - start))
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
                 await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
-                print('Impersonator - {} found - Out of {} Total members'.format(impersonator.name, len(members)))
+                print('Impersonator - {} found - Out of {} Total members'.format(impersonator.name, len(guild_members)))
                 notified_impersonators.append(impersonator.name)
             if CONFIG['ban_impersonator']:
                 await client.ban(impersonator)
@@ -175,7 +175,7 @@ async def ban_impersonators(notified_impersonators):
         CHECKING_BANS = False
 
 
-async def ban_scammers():
+async def ban_scammers(guild_members):
     global CHECKING_BANS
     if CHECKING_BANS:
         # Avoid re-entrance.
@@ -184,9 +184,8 @@ async def ban_scammers():
         CHECKING_BANS = True
         print("Checking scammers...")
         start = time()
-        members = list(client.get_all_members())
-        scammers = [ member for member in members for prefix in CONFIG["scammer_keywords"] if prefix.lower() in member.display_name.lower() ]
-        print("{} members, {} scammers, {} sec". format(len(members), len(scammers), time() - start))
+        scammers = [ member for member in guild_members for scam_keyword in CONFIG["scammer_keywords"] if scam_keyword.lower() in member.display_name.lower() or scam_keyword.lower() in member.name.lower()]
+        print("{} members, {} scammer(s), {} sec". format(len(guild_members), len(scammers), time() - start))
         for scammer in scammers:
             await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " will be banned")
             await client.ban(scammer)
