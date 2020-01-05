@@ -144,6 +144,7 @@ async def monitor_impersonators():
     print("Foundation list", CONFIG["foundation_members"])
     while not client.is_closed:
         await ban_impersonators(notified_impersonators)  # that method can't raise an exception
+        await ban_scammers()
         await asyncio.sleep(60)
 
 
@@ -170,6 +171,28 @@ async def ban_impersonators(notified_impersonators):
                 print('Impersonator - {} banned'.format(impersonator.name))
     except Exception as e:
         print("Exception ban_impersonators", str(e))
+    finally:
+        CHECKING_BANS = False
+
+
+async def ban_scammers():
+    global CHECKING_BANS
+    if CHECKING_BANS:
+        # Avoid re-entrance.
+        return
+    try:
+        CHECKING_BANS = True
+        print("Checking scammers...")
+        start = time()
+        members = list(client.get_all_members())
+        scammers = [ member for member in members for prefix in CONFIG["scammer_prefixes"] if prefix.lower() in member.display_name.lower() ]
+        print("{} members, {} scammers, {} sec". format(len(members), len(scammers), time() - start))
+        for scammer in scammers:
+            await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " will be banned")
+            await client.ban(scammer)
+            print('Scammer - {} banned'.format(scammer.name))
+    except Exception as e:
+        print("Exception ban_scammers", str(e))
     finally:
         CHECKING_BANS = False
 
