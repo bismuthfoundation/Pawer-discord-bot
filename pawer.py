@@ -5,6 +5,7 @@ Pawer Discord Bot for Bismuth Cryptocurrency
 import asyncio
 import re
 from time import time
+from sys import exit
 
 from discord.ext import commands
 from discord.utils import get
@@ -17,7 +18,7 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 
-__version__ = '0.63'
+__version__ = '0.64'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -175,6 +176,16 @@ async def ban_impersonators(notified_impersonators):
         CHECKING_BANS = False
 
 
+def is_scammer(member):
+    # print(member.display_name.lower(), member.name.lower())
+    for badword in CONFIG["scammer_keywords"]:
+        if badword in member.display_name.lower():
+            return True
+        if badword in member.name.lower():
+            return True
+    return False
+
+
 async def ban_scammers():
     global CHECKING_BANS
     if CHECKING_BANS:
@@ -182,14 +193,17 @@ async def ban_scammers():
         return
     try:
         CHECKING_BANS = True
-        print("Checking scammers...")
-        start = time()
+        print("Checking scammers...", CONFIG["scammer_keywords"])
+        # start = time()
         members = list(client.get_all_members())
-        scammers = [ member for member in members for prefix in CONFIG["scammer_keywords"] if prefix.lower() in member.display_name.lower() ]
-        print("{} members, {} scammers, {} sec". format(len(members), len(scammers), time() - start))
+        for member in members:
+            if is_scammer(member):
+                print(member.display_name, member.name)
+        scammers = [member for member in members if is_scammer(member)]
+        print("{} scammers". format(len(scammers)))
         for scammer in scammers:
             await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " will be banned")
-            await client.ban(scammer)
+            # await client.ban(scammer)
             print('Scammer - {} banned'.format(scammer.name))
     except Exception as e:
         print("Exception ban_scammers", str(e))
