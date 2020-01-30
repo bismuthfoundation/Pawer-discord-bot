@@ -18,7 +18,7 @@ from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 
-__version__ = '0.64'
+__version__ = '0.65'
 
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
@@ -146,7 +146,7 @@ async def monitor_impersonators():
     while not client.is_closed:
         await ban_impersonators(notified_impersonators)  # that method can't raise an exception
         await ban_scammers()
-        await asyncio.sleep(60)
+        await asyncio.sleep(30)
 
 
 async def ban_impersonators(notified_impersonators):
@@ -183,6 +183,9 @@ def is_scammer(member):
             return True
         if badword in member.name.lower():
             return True
+    for badhash in CONFIG["scammer_avatars"]:
+        if badhash == member.avatar:
+            return True
     return False
 
 
@@ -202,9 +205,10 @@ async def ban_scammers():
         scammers = [member for member in members if is_scammer(member)]
         print("{} scammers". format(len(scammers)))
         for scammer in scammers:
-            await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " will be banned")
-            # await client.ban(scammer)
+            await client.send_message(client.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " banned")
+            await client.ban(scammer)
             print('Scammer - {} banned'.format(scammer.name))
+
     except Exception as e:
         print("Exception ban_scammers", str(e))
     finally:
