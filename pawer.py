@@ -41,8 +41,8 @@ async def on_ready():
     print(client.user.id)
     print('------')
     EMOJIS['Bismuth'] = str(get(client.get_all_emojis(), name='Bismuth'))
-    await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands "
-                                                                            "didn't get an answer, just resend it.")
+    if "broadcast_restart" in CONFIG and CONFIG["broadcast_restart"]:
+        await client.send_message(client.get_channel(CONFIG['bot_channel'][0]), "I just restarted, if one of your commands didn't get an answer, just resend it.")
     client.loop.create_task(monitor_impersonators())
 
 @client.event
