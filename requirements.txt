@@ -1,6 +1,6 @@
 aiohttp
 discord.py==0.16.12
 requests
-BismuthClient>=0.0.44
+BismuthClient>=0.0.50
 validators
 re
