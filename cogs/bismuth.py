@@ -21,7 +21,6 @@ import asyncio
 """
 Potential todo:
     play paper / rock / scissor
-    play zircodice
     mining rentability calc
 """
 
@@ -32,6 +31,8 @@ DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge t
 Basically, you're using this service at your own risks.
 
 Type `Pawer accept` to say you understand and proceed."""
+
+MARKETS = ["qtrade", "vinex", "graviex", "finexbox", "hubi"]  # Markets we want to list
 
 
 async def get_users_from_addresses(addresses: list):
@@ -54,33 +55,26 @@ async def get_users_from_addresses(addresses: list):
     return result
 
 
-class Bismuth:
+class Bismuth(commands.Cog):
     """Bismuth specific Cogs"""
 
     def __init__(self, bot):
         self.bot = bot
         self.bot.tip_module = Tips()
 
-    async def safe_send_message(self, recipient, message):
+    @staticmethod
+    async def safe_send_message(recipient, message):
         try:
-            await self.bot.send_message(recipient, message)
+            if not recipient.dm_channel:
+                await recipient.create_dm()
+
+            await recipient.dm_channel.send(message)
         except Exception as e:
             print(e)
 
-    async def bismuth_deprecated(self, ctx):
-        # TODO: cache
-        url = 'https://bismuth.ciperyho.eu/api/markets'
-        response = await async_get(url, is_json=True)
-        cryptopia = response['markets']['Cryptopia']
-        qtrade = response['markets']['QTrade']
-        # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
-        await self.bot.say("{} price is:\n▸ {:0.8f} BTC or {:0.2f} USD on Cryptopia\n▸ {:0.8f} BTC or {:0.2f} USD on QTrade"
-                           .format(EMOJIS['Bismuth'], cryptopia['BTC']['lastPrice'], cryptopia['USD']['lastPrice'],
-                                   qtrade['BTC']['lastPrice'], qtrade['USD']['lastPrice']))
-
-    @commands.command(name='bismuth', brief="Shows bismuth price", pass_context=True)
+    @commands.command()
     async def bismuth(self, ctx):
-        MARKETS = ["qtrade", "vinex", "graviex", "finexbox", "hubi"]  # Markets we want to list
+        """Shows bismuth price"""
         # TODO: cache
         url = "https://api.coingecko.com/api/v3/coins/bismuth/tickers"
         api = await async_get(url, is_json=True)
@@ -95,29 +89,29 @@ class Bismuth:
                 if market["target"] == "USDT":
                     prices.append("▸ {:0.8f} USDT or {:0.3f} USD on {}".format(market["last"], market["converted_last"]["usd"], market["market"]["name"]))
         prices = "\n".join(prices)
-        # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
-        await self.bot.say("{} price is:\n{}".format(EMOJIS['Bismuth'], prices))
+        # await bot.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
+        await ctx.send("{} price is:\n{}".format(EMOJIS['Bismuth'], prices))
 
-    @commands.command(name='deposit', brief="Shows or creates a BIS deposit address", pass_context=True)
+    @commands.command()
     async def deposit(self, ctx):
-        user = User(ctx.message.author.id)
+        """Shows or creates a BIS deposit address"""
+        user = User(ctx.author.id)
         user_info = user.info()
-        print(ctx.message.author.id, user_info)
+        print(ctx.author.id, user_info)
         if user_info:
             if user_info['accept']:
                 msg = "{}, your {} address is `{}`".\
-                    format(ctx.message.author.display_name, EMOJIS['Bismuth'], user_info['address'])
+                    format(ctx.author.display_name, EMOJIS['Bismuth'], user_info['address'])
                 em = discord.Embed(description=msg, colour=discord.Colour.green())
-                await self.bot.say(embed=em)
-
+                await ctx.send(embed=em)
                 return
-
         em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.dark_orange())
         em.set_author(name="Terms:")
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @commands.command(name='info', brief="Shows bismuth chain info", pass_context=True)
+    @commands.command()
     async def info(self, ctx):
+        """Shows bismuth chain info"""
         # TODO: cache?
         status = User.status()
         # print(status)
@@ -136,63 +130,65 @@ class Bismuth:
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="Bismuth PoW status from {} on {} UTC".format(status['server'], ts_to_string(
             float(status['server_timestamp']))))
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @commands.command(name='balance', brief="Displays your current BIS balance", pass_context=True)
-    async def balance(self, ctx, *, type: str=''):
+    @commands.command()
+    async def balance(self, ctx):
+        """Displays your current BIS balance"""
         try:
             # TODO: several types of balance (bis, usd, eur?) or by reactions rather than message ;)
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
-            # print(ctx.message.author.id, user_info)
+            # print(ctx.author.id, user_info)
             if user_info and user_info['address']:
                     # User exists and validated the terms, has an address
                     balance = user.balance()
                     msg = "{}, your balance is {} {}".\
-                        format(ctx.message.author.display_name, balance, EMOJIS['Bismuth'])
+                        format(ctx.author.display_name, balance, EMOJIS['Bismuth'])
                     em = discord.Embed(description=msg, colour=discord.Colour.green())
-                    await self.bot.say(embed=em)
+                    await ctx.send(embed=em)
                     return
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+            await ctx.message.add_reaction('👎')  # Thumb down
 
-    @commands.command(name='tip', brief="Tip a user, default 1 bis, min 0.1, max 50 BIS", pass_context=True)
+    @commands.command()
     async def tip(self, ctx, who_to_tip: discord.Member, amount: str='1'):
+        """Tip a user, default 1 bis, min 0.1, max 50 BIS"""
         try:
             amount = float(amount)
             if amount > 50:
                 amount = 50
-                await self.bot.say("Maw tip amount too high, lowering to 50 {}".format(EMOJIS['Bismuth']))
+                await ctx.send("Maw tip amount too high, lowering to 50 {}".format(EMOJIS['Bismuth']))
 
             if amount < 0.1:
                 amount = 0.1
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
-            # print(ctx.message.author.id, user_info)
+            # print(ctx.author.id, user_info)
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
                 # We could get a custom default tip value here from the info
                 # Make sure balance is enough
                 balance = float(user.balance())
-                msg = "{} tip {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                msg = "{} tip {}, balance is {} ".format(ctx.author.display_name, amount, balance)
                 print(msg)
                 if balance < amount + 0.01:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
-                    # await self.bot.add_reaction(ctx.message, '⚖️')
+                    await ctx.message.add_reaction('😟')
+                    # await ctx.message.add_reaction('⚖️')
                     return
                 user_to_tip_info = User(who_to_tip.id).info()
                 print("to_tip", user_to_tip_info)
                 if not user_to_tip_info or not user_to_tip_info['address']:
                     print("user has no wallet")
-                    await self.bot.add_reaction(ctx.message, '🤔')  # Thinking face purse
+                    await ctx.message.add_reaction('🤔')  # Thinking face purse
                     message = "Hi {}, {} wanted to tip you, but you do not have a Discord Bismuth wallet yet.\n"\
-                              .format(who_to_tip.display_name, ctx.message.author.display_name)
+                              .format(who_to_tip.display_name, ctx.author.display_name)
                     message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
                     message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
                     message += "Use `Pawer help` to get a full list of what I can do."
@@ -204,25 +200,26 @@ class Bismuth:
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                    await ctx.message.add_reaction('👍')  # Thumb up
                     message = "Yeah! You've been tipped {:0.2f} {} by {} ({}) from the Bismuth discord!"\
-                              .format(amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
+                              .format(amount, EMOJIS['Bismuth'], ctx.author, ctx.author.display_name)
                     await self.safe_send_message(who_to_tip, message)
 
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')
+                    await ctx.message.add_reaction('👎')
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
+            await ctx.message.add_reaction('👎')  # Thumb down
 
-    @commands.command(name='rain', brief="Distribute a given amount between n users", pass_context=True)
+    @commands.command()
     async def rain(self, ctx, total_amount: str='10', how_many_users: str='10'):
+        """Distribute a given amount between n users"""
         try:
             if "/" in total_amount:
                 data = total_amount.split("/")
@@ -244,23 +241,23 @@ class Bismuth:
             if total_amount < 0.1 * how_many_users:
                 how_many_users = int(total_amount/0.1)
             individual_amount = total_amount/how_many_users
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
 
             user_info = user.info()
             if user_info and user_info['address']:
                 balance = float(user.balance())
-                msg = "{} rain {} bis to {} users, balance is {} ".format(ctx.message.author.display_name, total_amount,
+                msg = "{} rain {} bis to {} users, balance is {} ".format(ctx.author.display_name, total_amount,
                                                                           how_many_users, balance)
                 print(msg)
                 if balance < total_amount + 0.01 * how_many_users:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
+                    await ctx.message.add_reaction('😟')
                     return
 
                 registered_members = []
                 unregistered_members = []
                 for member in self.bot.get_all_members():
-                    if str(member.status) != "offline" and not member.bot and member.name != ctx.message.author.name:
+                    if str(member.status) != "offline" and not member.bot and member.name != ctx.author.name:
                         #print(member.name, member.status, member.bot)
                         current_user = User(member.id)
                         member_info = current_user.info()
@@ -274,8 +271,8 @@ class Bismuth:
                 shuffle(unregistered_members)
 
                 message = "Yeah! You got {:0.2f} {} from the rain of {} ({}) from the Bismuth discord!" \
-                    .format(individual_amount, EMOJIS['Bismuth'], ctx.message.author, ctx.message.author.display_name)
-                final_message = "{} sent {:0.2f} {} each to: ".format(ctx.message.author.mention, individual_amount, EMOJIS['Bismuth'])
+                    .format(individual_amount, EMOJIS['Bismuth'], ctx.author, ctx.author.display_name)
+                final_message = "{} sent {:0.2f} {} each to: ".format(ctx.author.mention, individual_amount, EMOJIS['Bismuth'])
                 self.bot.tip_module.start_rain(user_info['address'], individual_amount*how_many_real_users, how_many_real_users, "rain")
                 for current_member in registered_members[:how_many_real_users]:
                     to_address = User(current_member.id).info()['address']
@@ -283,12 +280,12 @@ class Bismuth:
                     self.bot.tip_module.tip(user_info['address'], to_address, individual_amount, "rain")
                     final_message += current_member.mention + " "
                     await self.safe_send_message(current_member, message)
-                await self.bot.say(final_message)
-                await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
+                await ctx.send(final_message)
+                await ctx.message.add_reaction('👍')  # Thumb up
 
                 for current_member in unregistered_members[:10]:
                     message = "Hi {}, {} launched a rain, but you do not have a Discord Bismuth wallet yet.\n" \
-                        .format(current_member.display_name, ctx.message.author.display_name)
+                        .format(current_member.display_name, ctx.author.display_name)
                     message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
                     message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
                     message += "Use `Pawer help` to get a full list of what I can do."
@@ -299,167 +296,170 @@ class Bismuth:
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down@commands.command(name='rain', brief="Distribute a given amount between n users", pass_context=True)
+            await ctx.message.add_reaction('👎')  # Thumb down
 
-    @commands.command(name='withdraw', brief="Send BIS from your wallet to any BIS address, with an optional message", pass_context=True)
+    @commands.command()
     async def withdraw(self, ctx, address:str, amount: str, *message):
+        """Send BIS from your wallet to any BIS address, with an optional message"""
         try:
             amount = float(amount)
             openfield_data = ' '.join(filter(None, message))
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
             # Check the address looks ok
             if not BismuthUtil.valid_address(address):
                 print("address error")
-                await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Address does not look ok. Command is `Pawer withdraw <address> <amount> [message]`")
+                await ctx.message.add_reaction('😟')
+                await ctx.send("Address does not look ok. Command is `Pawer withdraw <address> <amount> [message]`")
                 return
 
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                msg = "{} withdraw {}, balance is {} ".format(ctx.author.display_name, amount, balance)
                 fees = BismuthUtil.fee_for_tx(openfield_data)
                 print(msg)
                 if balance < amount + 0.01:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
-                    await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
+                    await ctx.message.add_reaction('😟')
+                    await ctx.send("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
                 send = user.send_bis_to(amount, address, data=openfield_data)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                    await self.bot.say("Done, txid is {}.".format(txid))
+                    await ctx.message.add_reaction('👍')  # Thumb up
+                    await ctx.send("Done, txid is {}.".format(txid))
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Error {}".format(send['error']))
+                    await ctx.message.add_reaction('👎')  # Thumb down
+                    await ctx.send("Error {}".format(send['error']))
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Error {}".format(e))
+            await ctx.message.add_reaction('👎')  # Thumb down
+            await ctx.send("Error {}".format(e))
 
-    @commands.command(name='zirco', brief="Play ZircoDice from your pawer wallet, with any amount less than 100 along with your bet ", pass_context=True)
+    @commands.command()
     async def zirco(self, ctx, amount: str, bet: str):
+        """Play ZircoDice from your pawer wallet, with any amount less than 100 along with your bet """
         try:
             amount = float(amount)
             zirco_service_address = '340c195f768be515488a6efedb958e135150b2ef3e53573a7017ac7d'
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
 
             # Check the bet field
             if bet.lower() not in ('odd', 'even'):
                 print("OpenField data error")
-                await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Your bet does not look ok. Command is `Pawer zirco <amount> <odd/even>`")
+                await ctx.message.add_reaction('😟')
+                await ctx.send("Your bet does not look ok. Command is `Pawer zirco <amount> <odd/even>`")
                 return
 
             # Check the bet amount
             if (amount - float(100)) > 0.01 :
                 print("Bet amount too high")
-                await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("You are betting too high. Recommended amount is less than 100`")
+                await ctx.message.add_reaction('😟')
+                await ctx.send("You are betting too high. Recommended amount is less than 100`")
                 return
 
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                msg = "{} zirco {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                msg = "{} zirco {}, balance is {} ".format(ctx.author.display_name, amount, balance)
                 fees = BismuthUtil.fee_for_tx(bet)
                 print(msg)
                 if balance < amount + 0.01004:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
-                    await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
+                    await ctx.message.add_reaction('😟')
+                    await ctx.send("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
                 send = user.send_bis_to(amount, zirco_service_address, data=bet)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                    await self.bot.say("Your bet has been placed. Txid is {}".format(txid))
+                    await ctx.message.add_reaction('👍')  # Thumb up
+                    await ctx.send("Your bet has been placed. Txid is {}".format(txid))
                     await self.bot.remove_reaction(ctx.message, '⏳', self.bot.user)
-                    await self.bot.loop.create_task(self.get_zirco_status(ctx.message.author, txid))
+                    await self.get_zirco_status(ctx.author, txid)
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Can't place your bet. Error {}".format(send['error']))
+                    await ctx.message.add_reaction('👎')  # Thumb down
+                    await ctx.send("Can't place your bet. Error {}".format(send['error']))
                 return
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Can't place your bet. Error {}".format(e))
+            await ctx.message.add_reaction('👎')  # Thumb down
+            await ctx.send("Can't place your bet. Error {}".format(e))
 
-    @commands.command(name='operation', brief="Send a generic 'operation' transaction, with an optional message", pass_context=True)
+    @commands.command()
     async def operation(self, ctx, operation: str, address:str, amount: str, *message):
+        """Send a generic 'operation' transaction, with an optional message"""
         # TODO: too much code in common with withdraw, factorize somehow.
         try:
             amount = float(amount)
             openfield_data = ' '.join(filter(None, message))
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
             # Check the address looks ok
             if not BismuthUtil.valid_address(address):
                 print("address error")
-                await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Address does not look ok. Command is `Pawer operation <operation> <address> <amount> [message]`")
+                await ctx.message.add_reaction('😟')
+                await ctx.send("Address does not look ok. Command is `Pawer operation <operation> <address> <amount> [message]`")
                 return
 
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                msg = "{} withdraw {}, balance is {} ".format(ctx.author.display_name, amount, balance)
                 fees = BismuthUtil.fee_for_tx(openfield_data)
                 print(msg)
                 if balance < amount + 0.01:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
-                    await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
+                    await ctx.message.add_reaction('😟')
+                    await ctx.send("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
                 send = user.send_bis_to(amount, address, data=openfield_data, operation=operation)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                    await self.bot.say("Done, txid is {}.".format(txid))
+                    await ctx.message.add_reaction('👍')  # Thumb up
+                    await ctx.send("Done, txid is {}.".format(txid))
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Error {}".format(send['error']))
+                    await ctx.message.add_reaction('👎')  # Thumb down
+                    await ctx.send("Error {}".format(send['error']))
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Error {}".format(e))
+            await ctx.message.add_reaction('👎')  # Thumb down
+            await ctx.send("Error {}".format(e))
 
-    @commands.command(name='freebismuth', brief="Register your #Bismuth tweet and get free bismuth", pass_context=True)
+    @commands.command()
     async def freebismuth(self, ctx, tweet_url: str):
-        # TODO: too much code in common with operation, factorize somehow.
+        """Register your #Bismuth tweet and get free bismuth"""
         try:
             amount = float(0)  # amount has to be 0
             operation = 'twitter'
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
             address = user_info['address']
 
@@ -467,8 +467,8 @@ class Bismuth:
             # TODO: Validate tweet likes and retweets as per freebismuth spec
             if not validators.url(tweet_url):
                 print("tweet url error")
-                await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Link to the tweet does not look ok. Command is `Pawer freebismuth <tweet_url>`")
+                await ctx.message.add_reaction('😟')
+                await ctx.send("Link to the tweet does not look ok. Command is `Pawer freebismuth <tweet_url>`")
                 return
 
             if user_info and user_info['address']:
@@ -476,40 +476,41 @@ class Bismuth:
                 # Make sure balance is enough
                 balance = float(user.balance())
                 tweet_id = re.search('/status/(\d+)', tweet_url).group(1)  # Extract tweet ID
-                msg = "{} freebismuth, tweet ID is {} ".format(ctx.message.author.display_name, tweet_id)
+                msg = "{} freebismuth, tweet ID is {} ".format(ctx.author.display_name, tweet_id)
                 fees = BismuthUtil.fee_for_tx(tweet_id)
                 print(msg)
                 if balance < amount + fees:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
-                    await self.bot.say("Not enough balance to cover fee ({} Fees)".format(fees))
+                    await ctx.message.add_reaction('😟')
+                    await ctx.send("Not enough balance to cover fee ({} Fees)".format(fees))
                     return
                 send = user.send_bis_to(amount, address, data=tweet_id, operation=operation)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                    await self.bot.say("Your tweet has been registered. Txid is {}.".format(txid))
+                    await ctx.message.add_reaction('👍')  # Thumb up
+                    await ctx.send("Your tweet has been registered. Txid is {}.".format(txid))
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Can't register your tweet. Error {}".format(send['error']))
+                    await ctx.message.add_reaction('👎')  # Thumb down
+                    await ctx.send("Can't register your tweet. Error {}".format(send['error']))
                 return
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Can't register your tweet. Error {}".format(e))
+            await ctx.message.add_reaction('👎')  # Thumb down
+            await ctx.send("Can't register your tweet. Error {}".format(e))
 
-    @commands.command(name='bisurl', brief="Decode a transaction from a BIS URL. Append SEND to effectively send the tx.", pass_context=True)
+    @commands.command()
     async def bisurl(self, ctx, bisurl: str, send: str='NO'):
+        """Decode a transaction from a BIS URL. Append SEND to effectively send the tx."""
         # TODO: too much code in common with withdraw, factorize somehow.
         try:
             try:
                 decode = BismuthUtil.read_url(bisurl)
             except Exception as e:
-                await self.bot.add_reaction(ctx.message, '😢')  # Crying
-                await self.bot.say("Does not look like a proper BIS URL")
+                await ctx.message.add_reaction('😢')  # Crying
+                await ctx.send("Does not look like a proper BIS URL")
                 return
             amount = float(decode['amount'])
             address = decode['recipient']
@@ -526,61 +527,62 @@ class Bismuth:
                 title = "Decoded BIS URL:"
                 em = discord.Embed(description=decoded, colour=discord.Colour.green())
                 em.set_author(name=title)
-                await self.bot.say(embed=em)
+                await ctx.send(embed=em)
             else:
                 title = "Decoded BIS URL: (**not** sent)"
                 decoded += " \nPaste this command again and append ` SEND` if you want to send that transaction.\n"
                 em = discord.Embed(description=decoded, colour=discord.Colour.green())
                 em.set_author(name=title)
-                await self.bot.say(embed=em)
+                await ctx.send(embed=em)
                 return
 
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
             # Check the address looks ok
             if not BismuthUtil.valid_address(decode['recipient']):
                 print("address error")
-                await self.bot.add_reaction(ctx.message, '😟')
-                await self.bot.say("Address does not look ok. Command is `Pawer operation <operation> <address> <amount> [message]`")
+                await ctx.message.add_reaction('😟')
+                await ctx.send("Address does not look ok. Command is `Pawer operation <operation> <address> <amount> [message]`")
                 return
 
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
                 # Make sure balance is enough
                 balance = float(user.balance())
-                msg = "{} withdraw {}, balance is {} ".format(ctx.message.author.display_name, amount, balance)
+                msg = "{} withdraw {}, balance is {} ".format(ctx.author.display_name, amount, balance)
                 fees = BismuthUtil.fee_for_tx(message)
                 print(msg)
                 if balance < amount + 0.01:
                     print("balance too low")
-                    await self.bot.add_reaction(ctx.message, '😟')
-                    await self.bot.say("Not enough balance to cover amount + fee ({} Fees)".format(fees))
+                    await ctx.message.add_reaction('😟')
+                    await ctx.send("Not enough balance to cover amount + fee ({} Fees)".format(fees))
                     return
                 send = user.send_bis_to(amount, address, data=message, operation=operation)
                 txid = send['txid']
                 print("txid", txid)
                 if txid:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                    await self.bot.say("Done, txid is {}.".format(txid))
+                    await ctx.message.add_reaction('👍')  # Thumb up
+                    await ctx.send("Done, txid is {}.".format(txid))
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Error {}".format(send['error']))
+                    await ctx.message.add_reaction('👎')  # Thumb down
+                    await ctx.send("Error {}".format(send['error']))
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Error {}".format(e))
+            await ctx.message.add_reaction('👎')  # Thumb down
+            await ctx.send("Error {}".format(e))
 
-    @commands.command(name='sign', brief="Sign a message from your wallet, for off-chain use", pass_context=True)
+    @commands.command()
     async def sign(self, ctx, message: str):
+        """Sign a message from your wallet, for off-chain use"""
         try:
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
             if user_info and user_info['address']:
                 # User exists and validated the terms, has an address
@@ -590,25 +592,26 @@ class Bismuth:
                 # print("sign", sign)
                 if sign:
                     # answer by reaction not to pollute
-                    await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
-                    await self.bot.say("Signature is `{}`.".format(sign))
+                    await ctx.message.add_reaction('👍')  # Thumb up
+                    await ctx.send("Signature is `{}`.".format(sign))
                 else:
-                    await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-                    await self.bot.say("Error {}".format(res['error']))
+                    await ctx.message.add_reaction('👎')  # Thumb down
+                    await ctx.send("Error {}".format(res['error']))
                 return
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
-            await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
-            await self.bot.say("Error {}".format(e))
+            await ctx.message.add_reaction('👎')  # Thumb down
+            await ctx.send("Error {}".format(e))
 
-    @commands.command(name='accept', brief="Accept the Pawer terms, run deposit first", pass_context=True)
+    @commands.command()
     async def accept(self, ctx):
-        user = User(ctx.message.author.id)
+        """Accept the Pawer terms, run deposit first"""
+        user = User(ctx.author.id)
         user_info = user.info()
         # if accepted, say when and gives address
         if user_info:
@@ -616,30 +619,32 @@ class Bismuth:
                 msg = "Your :bis: address is `{}`".format(user_info['address'])
                 em = discord.Embed(description=msg, colour=discord.Colour.orange())
                 em.set_author(name="{}, you already accepted the terms on {}".
-                              format(ctx.message.author.display_name, ts_to_string(user_info['accept'])))
-                await self.bot.say(embed=em)
+                              format(ctx.author.display_name, ts_to_string(user_info['accept'])))
+                await ctx.send(embed=em)
                 return
         # If not, creates wallet and stores accepted.
         address = user.create_wallet()
         info = {"accept": int(time.time()), "address": address}
         user.save(info)
 
-        self.bot.tip_module.add_user(address, ctx.message.author.id, ctx.message.author.display_name)
+        self.bot.tip_module.add_user(address, ctx.author.id, ctx.author.display_name)
 
         # TODO: safety, store an encrypted backup of the wallet elsewhere.
         msg = "Your {} address is `{}`".format(EMOJIS['Bismuth'], info['address'])
         em = discord.Embed(description=msg, colour=discord.Colour.green())
-        em.set_author(name="{}: Terms accepted".format(ctx.message.author.display_name))
-        await self.bot.say(embed=em)
+        em.set_author(name="{}: Terms accepted".format(ctx.author.display_name))
+        await ctx.send(embed=em)
 
-    @commands.command(name='terms', brief="Remind the current Pawer terms of use.", pass_context=True)
+    @commands.command()
     async def terms(self, ctx):
+        """Remind the current Pawer terms of use."""
         em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.green())
         em.set_author(name="Current terms of use:")
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @commands.command(name='graph', brief="Shows bismuth graphs: pools, diff, blocktime, hypernodes", pass_context=True)
+    @commands.command()
     async def graph(self, ctx, type=''):
+        """Shows bismuth graphs: pools, diff, blocktime, hypernodes"""
         rkey = time.time()
         urls = {'pools': ["Bismuth Pools estimated hashrate", 'https://hypernodes.bismuth.live/plots/hr.php?col=1&void={}'.format(rkey)],
                 'diff': ["Mainnet difficulty evolution", 'https://hypernodes.bismuth.live/plots/mainnet/diff.php?void={}'.format(rkey)],
@@ -649,19 +654,19 @@ class Bismuth:
             msg = "\n".join(["`{}`: {}".format(a,b[0]) for a, b in urls.items()])
             em = discord.Embed(description=msg, colour=discord.Colour.red())
             em.set_author(name="Error: Please specify a graph type")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         em = discord.Embed()
         em.set_image(url=urls[type][1])
         em.set_author(name=urls[type][0])
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @commands.command(name='board', brief="Shows stats of given action: tip/rain", pass_context=True)
+    @commands.command()
     async def board(self, ctx, action:str):
-
+        """Shows stats of given action: tip/rain"""
         with open("data/tips.json") as f:
             data = json.load(f)
         if action not in data:
-            await self.bot.say("unknown action")
+            await ctx.send("unknown action")
             return
         msg = "__Who gave the most:__\n\n"
         for user in data[action]["from"]:
@@ -673,7 +678,7 @@ class Bismuth:
 
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="{} board".format(action))
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
     async def get_zirco_status(self, sender, txid):
         try:

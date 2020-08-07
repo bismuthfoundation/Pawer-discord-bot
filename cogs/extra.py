@@ -38,7 +38,7 @@ class Extra:
         """
         response = await async_get(url, is_json=True)
         value = response['bpi']['USD']['rate'].replace(',', '')
-        # await client.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
+        # await bot.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
         await self.bot.say("Bitcoin price is {:0.2f} USD".format(float(value)))
 
     @commands.command(name='avah', brief="Show user avatar hash", pass_context=True)
