@@ -41,7 +41,7 @@ class Token(commands.Cog):
     async def token(self, ctx):
         """Token commands"""
         if ctx.invoked_subcommand is None:
-            await ctx.send('token needs a subcommand: balance')
+            await ctx.send('token needs a subcommand: balance, send, transactions')
 
     @token.command()
     async def balance(self, ctx, token: str=""):

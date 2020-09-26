@@ -17,6 +17,7 @@ from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
+from discord.ext.tasks import loop
 
 __version__ = '0.65'
 
@@ -119,8 +120,9 @@ async def user_count(message):
         print(str(e))
 
 
-@bot.command(name='about', brief="Pawer bot general info", pass_context=True)
+@bot.command()
 async def about(ctx):
+    """Pawer bot general info"""
     # TODO: cache?
     # version
     # release logs?
@@ -131,6 +133,15 @@ async def about(ctx):
             __version__))
 
 
+@loop(seconds=60)
+async def background_task():
+    for cog in background_cog_list:
+        try:
+            await cog.background_task(bot=bot)
+        except Exception as e:
+            print(e)
+
+"""
 async def background_task(cog_list):
     await bot.wait_until_ready()
     while not bot.is_closed:
@@ -140,6 +151,7 @@ async def background_task(cog_list):
             except:
                 pass
         await asyncio.sleep(60)
+"""
 
 
 async def monitor_impersonators():
@@ -222,16 +234,19 @@ async def ban_scammers():
 
 if __name__ == '__main__':
     """
+
+    dragg = Dragginator(bot)
+    bot.add_cog(dragg)
     
+    """
     hypernodes = Hypernodes(bot)
     bot.add_cog(hypernodes)
     bot.add_cog(Extra(bot))
-    dragg = Dragginator(bot)
-    bot.add_cog(dragg)
-    bot.add_cog(Autogame(bot))
-    """
     bot.add_cog(Bismuth(bot))
     bot.add_cog(Token())
+    bot.add_cog(Autogame())
     #bot.loop.create_task(background_task([dragg, hypernodes]))
 
+    background_cog_list = [hypernodes]
+    background_task.start()
     bot.run(CONFIG['token'])

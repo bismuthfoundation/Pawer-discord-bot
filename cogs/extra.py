@@ -2,53 +2,44 @@
 Extra cogs
 """
 
-# import requests
 import discord
 from discord.ext import commands
-from modules.helpers import async_get, User
+from modules.helpers import async_get
+from json import loads as json_loads
 
-class Extra:
+
+class Extra(commands.Cog):
     """Useful cogs not Bismuth specific"""
 
     def __init__(self, bot):
         self.bot = bot
 
-    async def safe_send_message(self, recipient, message):
-        try:
-            await self.bot.send_message(recipient, message)
-        except Exception as e:
-            print(e)
-
-    @commands.command(name='test', brief="test", pass_context=True)
-    async def test(self, ctx):
-        # print(ctx.message.content)
-        await self.bot.say('test')
+    @commands.command()
+    async def ping(self, ctx):
+        """Pong"""
+        await ctx.send('Pong')
 
     @commands.command()
-    async def ping(self):
-        await self.bot.say('Pong')
-
-    @commands.command(name='bitcoin', brief="Shows bitcoin price")
-    async def bitcoin(self, pass_context=True):
+    async def bitcoin(self, ctx):
+        """Shows bitcoin price"""
         # TODO: cache
         url = 'https://api.coindesk.com/v1/bpi/currentprice/BTC.json'
         """
         response = requests.get(url)
         value = response.json()['bpi']['USD']['rate']
         """
-        response = await async_get(url, is_json=True)
+        response = json_loads(await async_get(url))
         value = response['bpi']['USD']['rate'].replace(',', '')
-        # await bot.send_message(discord.Object(id='502494064420061184'), "Bitcoin price is: " + value)
-        await self.bot.say("Bitcoin price is {:0.2f} USD".format(float(value)))
+        await ctx.send("Bitcoin price is {:0.2f} USD".format(float(value)))
 
-    @commands.command(name='avah', brief="Show user avatar hash", pass_context=True)
+    @commands.command()
     async def avah(self, ctx, who: discord.Member):
-        # user = User(who)
-        # print(User)
+        """Show user avatar hash"""
+
         message = "User avatar hash is {}".format(who.avatar)
         # TODO: list other users with this hash
-        await self.bot.say(message)
+        await ctx.send(message)
         members = list(self.bot.get_all_members()) 
         for member in members:
             if member.avatar == who.avatar:
-                await self.bot.say("Found for {}".format(member.mention))
+                await ctx.send("Found for {}".format(member.mention))
