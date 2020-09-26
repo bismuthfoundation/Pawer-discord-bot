@@ -3,16 +3,18 @@ Dragginator related cog
 
 @Iyomisc
 """
+
 import datetime
 import discord
 import os
 import json
 from discord.ext import commands
-from modules.helpers import User, async_get
+from modules.helpers import User, async_get, safe_send_message
 from cogs.bismuth import get_users_from_addresses
 from random import shuffle
 # Current Draggon Egg price in BIS
 EGG_PRICE = 3
+
 DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge that:
 - This is meant to be used for tips, thanks you, quick experiments and other small amount usage.
 - The matching wallet private key is stored on a secret online server, team operated.
@@ -31,7 +33,7 @@ def _get_from_servers(bot, getter, argument):
     return result
 
 
-class Dragginator:
+class Dragginator(commands.Cog):
     """Dragginator Cogs"""
 
     def __init__(self, bot):
@@ -43,42 +45,37 @@ class Dragginator:
         if not os.path.exists("data/dragginator.json"):
             open("data/dragginator.json", "w").write('{"last_day":""}')
 
-    async def safe_send_message(self, recipient, message):
-        try:
-            await self.bot.send_message(recipient, message)
-        except Exception as e:
-            print(e)
-
-    @commands.group(name='dragg', brief="Dragginator commands", pass_context=True)
+    @commands.group()
     async def dragg(self, ctx):
+        """Dragginator commands"""
         if ctx.invoked_subcommand is None:
-            await self.bot.say('Commands for Dragginator'.format(ctx))
+            await ctx.send('Commands for Dragginator')
 
-    @dragg.command(name='list', brief="List your eggs", pass_context=True)
+    @dragg.command()
     async def list(self, ctx):
-        """List eggs for current user"""
-        user = User(ctx.message.author.id)
+        """List your eggs"""
+        user = User(ctx.author.id)
         user_info = user.info()
         address = user_info['address']
-        # await self.bot.say("Eggs of {}".format(address))
-        eggs = await async_get("https://dragginator.com/api/info.php?address={}&type=list".format(address),
-                               is_json=True)
+        # await ctx.send("Eggs of {}".format(address))
+        eggs = await async_get("https://dragginator.com/api/info.php?address={}&type=list".format(address), is_json=True)
         msg = ""
         for egg in eggs:
             msg += "- {}\n".format(egg["dna"])
+
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="Eggs of {}".format(address))
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @dragg.command(name='eggdrop', brief="Register to the current eggdrop (only if you don't have any egg)",
-                   pass_context=True)
+    @dragg.command()
     async def eggdrop(self, ctx):
-        """Auto register for the eggdrop"""
-        user = User(ctx.message.author.id)
+        """Register to the current eggdrop (only if you don't have any egg)"""
+        user = User(ctx.author.id)
         user_info = user.info()
 
         data = await async_get(
             "https://dragginator.com/api/info.php?address={}&type=eggdrop".format(user_info['address']), is_json=True)
+
         if data[0] == "registered":
             msg = "You are already registered to the eggdrop"
         elif data[0]:
@@ -92,13 +89,12 @@ class Dragginator:
             msg = "Sorry, but you already own {} eggs".format(str(data[1]))
         em = discord.Embed(description=msg, colour=discord.Colour.green())
         em.set_author(name="Eggdrop")
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @dragg.command(name='buy', brief="Buy an egg with Bis - Current price is {} $BIS".format(EGG_PRICE),
-                   pass_context=True)
+    @dragg.command()
     async def buy(self, ctx):
-        """Buy an egg with Bis"""
-        user = User(ctx.message.author.id)
+        """Buy an egg with Bis - Current price is {} $BIS""".format(EGG_PRICE)
+        user = User(ctx.author.id)
         result = user.send_bis_to(EGG_PRICE, "9ba0f8ca03439a8b4222b256a5f56f4f563f6d83755f525992fa5daf",
                                   check_balance=True)
         if result["txid"]:
@@ -117,13 +113,13 @@ class Dragginator:
                                colour=discord.Colour.red())
 
         em.set_author(name="Get an egg with Bis")
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
     """ 
     @dragg.command(name='claim', brief="Claim a free egg for the advent calendar, only if you already have an egg",
                    pass_context=True)
     async def claim(self, ctx):
-        user = User(ctx.message.author.id)
+        user = User(ctx.author.id)
         user_info = user.info()
 
         data = await async_get(
@@ -150,12 +146,12 @@ class Dragginator:
             msg = "Sorry, but your address doesn't match with any of today's seeds"
         em = discord.Embed(description=msg, colour=colour)
         em.set_author(name="Advent calendar")
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
     """
 
-    @dragg.command(name='eggrain', brief="Distribute a given amount of eggs between n users (cost 3 bis per user)",
-                   pass_context=True)
+    @dragg.command()
     async def eggrain(self, ctx, how_many_users: str = '5'):
+        """Distribute a given amount of eggs between n users (costs {} bis per user)""".format(EGG_PRICE)
         try:
             how_many_users = int(how_many_users)
 
@@ -164,7 +160,7 @@ class Dragginator:
             if how_many_users < 1:
                 how_many_users = 1
 
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
             if user_info and user_info['address']:
                 balance = float(user.balance())
@@ -201,8 +197,8 @@ class Dragginator:
                                      operation="dragg:gift", data=User(current_member.id).info()['address'])
                     self.bot.tip_module.tip(user_info['address'], User(current_member.id).info()['address'], 1, "eggrain")
                     final_message += current_member.mention + " "
-                    await self.safe_send_message(current_member, message)
-                await self.bot.say(final_message)
+                    await safe_send_message(current_member, message)
+                await ctx.send(final_message)
                 await self.bot.add_reaction(ctx.message, '👍')  # Thumb up
 
                 for current_member in unregistered_members[:10]:
@@ -211,21 +207,22 @@ class Dragginator:
                     message += "It's easy, you just have to type `Pawer deposit` here to read and accept the terms.\n"
                     message += "Then you'll have an address of yours and be able to receive tips and play with me.\n"
                     message += "Use `Pawer help` to get a full list of what I can do."
-                    await self.safe_send_message(current_member, message)
+                    await safe_send_message(current_member, message)
 
                 return
 
             # Depending on channel, say or send PM
             em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.red())
             em.set_author(name="You have to create your address first:")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
         except Exception as e:
             print(str(e))
             # Send a PM to the sender or answer if dedicated channel
             await self.bot.add_reaction(ctx.message, '👎')  # Thumb down
 
-    @dragg.command(name='see', brief="show the specified egg/draggon", pass_context=True)
+    @dragg.command()
     async def see(self, ctx, dna: str, egg_or_draggon: str="egg"):
+        """shows the specified egg/draggon"""
         data = await async_get(
             "https://dragginator.com/api/pawer/see_api.php?dna={}&type={}".format(dna, egg_or_draggon), is_json=True)
 
@@ -233,27 +230,29 @@ class Dragginator:
         if "url" in data:
             em.set_image(url=data["url"])
         em.set_author(name=data["title"])
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @dragg.command(name='cup', brief="Give informations about the cup", pass_context=True)
+    @dragg.command()
     async def cup(self, ctx):
+        """Give information about the cup"""
 
-        user = User(ctx.message.author.id)
+        user = User(ctx.author.id)
         user_info = user.info()
         data = await async_get(
             "https://dragginator.com/api/cup/address/?address={}&raw=1".format(user_info['address']), is_json=True)
         em = discord.Embed(description=data["message"], colour=discord.Colour.green())
         em.set_author(name=data["title"])
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @dragg.command(name='register', brief="Registers a dna to the cup", pass_context=True)
+    @dragg.command()
     async def register(self, ctx, *dna):
+        """Registers a dna to the cup"""
         message = ""
         title = "Registering {}".format(dna)
         if dna:
             dna = dna[0]
             title = "Registering {}".format(dna)
-            user = User(ctx.message.author.id)
+            user = User(ctx.author.id)
             user_info = user.info()
 
             if user_info and user_info['address']:
@@ -268,7 +267,7 @@ class Dragginator:
                         message = "Invalid signature! Are you sure you own this dna?"
                     else:
                         if data["can_join_cup"]:
-                            message = "Dna successfuly registered!"
+                            message = "Dna successfully registered!"
                         else:
                             message = "This dna can't join this cup."
                 else:
@@ -280,11 +279,12 @@ class Dragginator:
 
         em = discord.Embed(description=message, colour=discord.Colour.green())
         em.set_author(name=title)
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    @dragg.command(name='leagues', brief="Give informations about the leagues", pass_context=True)
+    @dragg.command()
     async def leagues(self, ctx, *dna):
-        user = User(ctx.message.author.id)
+        """Gives information about the leagues"""
+        user = User(ctx.author.id)
         user_info = user.info()
         if len(dna) and dna[0] == "register":
 
@@ -305,8 +305,9 @@ class Dragginator:
                                    colour=discord.Colour.red())
 
             em.set_author(name="")
-            await self.bot.say(embed=em)
+            await ctx.send(embed=em)
             return
+
         if len(dna):
             dna = dna[0]
         else:
@@ -314,11 +315,12 @@ class Dragginator:
         data = await async_get(
             "https://dragginator.com/api/pawer/leagues_api.php?address={}&dna={}".format(user_info['address'], dna),
             is_json=True)
+
         em = discord.Embed(description=data["message"], colour=discord.Colour.green())
         em.set_author(name=data["title"])
-        await self.bot.say(embed=em)
+        await ctx.send(embed=em)
 
-    async def background_task(self):
+    async def background_task(self, bot=None):
         # Only run every 15 min
         self.background_count += 1
         if self.background_count < 14:
@@ -346,4 +348,3 @@ class Dragginator:
         with open("data/dragginator.json", "w") as f:
             json.dump(data, f)
 
-    # badges (empty or address)

@@ -19,6 +19,15 @@ def ts_to_string(timestamp):
     return datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 
+async def safe_send_message(recipient, message):
+    try:
+        if not recipient.dm_channel:
+            await recipient.create_dm()
+
+        await recipient.dm_channel.send(message)
+    except Exception as e:
+        print(e)
+
 HTTP_SESSION = None
 
 BISMUTH_CLIENT = BismuthClient(verbose=True)
@@ -36,7 +45,7 @@ async def async_get(url, is_json=False):
     # async with aiohttp.ClientSession() as session:
     async with HTTP_SESSION.get(url) as resp:
         if is_json:
-            return await resp.json()
+            return json.loads(await resp.text())
         else:
             return await resp.text()
         # TODO: could use resp content-type to decide

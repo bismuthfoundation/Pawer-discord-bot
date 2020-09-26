@@ -233,20 +233,17 @@ async def ban_scammers():
 
 
 if __name__ == '__main__':
-    """
+    hypernodes = Hypernodes(bot)
+    bot.add_cog(hypernodes)
 
     dragg = Dragginator(bot)
     bot.add_cog(dragg)
-    
-    """
-    hypernodes = Hypernodes(bot)
-    bot.add_cog(hypernodes)
+
     bot.add_cog(Extra(bot))
     bot.add_cog(Bismuth(bot))
     bot.add_cog(Token())
     bot.add_cog(Autogame())
-    #bot.loop.create_task(background_task([dragg, hypernodes]))
 
-    background_cog_list = [hypernodes]
+    background_cog_list = [hypernodes, dragg]
     background_task.start()
     bot.run(CONFIG['token'])
