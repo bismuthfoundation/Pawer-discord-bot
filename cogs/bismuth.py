@@ -62,6 +62,20 @@ class Bismuth(commands.Cog):
         self.bot = bot
         self.bot.tip_module = Tips()
 
+    @classmethod
+    async def get_user_info(cls, ctx, user_id=None, send_message=True):
+        user = User(user_id if user_id else ctx.author.id)
+        user_info = user.info()
+        #print(ctx.author.id, user_info)
+        if user_info:
+            if user_info['accept']:
+                return user, user_info
+        if send_message:
+            em = discord.Embed(description=DISCLAIMER, colour=discord.Colour.dark_orange())
+            em.set_author(name="Terms:")
+            await ctx.send(embed=em)
+        return user, None
+
     @staticmethod
     async def safe_send_message(recipient, message):
         try:
@@ -404,8 +418,9 @@ class Bismuth(commands.Cog):
             await ctx.message.add_reaction('👎')  # Thumb down
             await ctx.send("Can't place your bet. Error {}".format(e))
 
+    @classmethod
     @commands.command()
-    async def operation(self, ctx, operation: str, address:str, amount: str, *message):
+    async def operation(cls, ctx, operation: str, address:str, amount: str, *message):
         """Send a generic 'operation' transaction, with an optional message"""
         # TODO: too much code in common with withdraw, factorize somehow.
         try:

@@ -10,6 +10,7 @@ from discord.ext import commands
 from discord.utils import get
 import discord
 from cogs.bismuth import Bismuth
+from cogs.token import Token
 from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
@@ -230,6 +231,7 @@ if __name__ == '__main__':
     bot.add_cog(Autogame(bot))
     """
     bot.add_cog(Bismuth(bot))
+    bot.add_cog(Token())
     #bot.loop.create_task(background_task([dragg, hypernodes]))
 
     bot.run(CONFIG['token'])
