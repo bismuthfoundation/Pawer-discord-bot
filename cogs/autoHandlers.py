@@ -77,7 +77,7 @@ class AutoCommands:
                                colour=Colour.magenta())
             info_embed.set_thumbnail(url=self.bot.user.avatar_url)
             info_embed.add_field(name='Bismuth Butler message!',
-                                 value=f"To bad you are living us. We would just like to remind you that, Prawer"
+                                 value=f"To bad you are leaving us. We would just like to remind you that, Prawer"
                                        f" allows to move Bismuth crypto currency in P2P transactions. Since you left us,"
                                        f" we would encourage you to check your personal wallet so Bismuth is not left "
                                        f"behind.")
