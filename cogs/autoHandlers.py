@@ -64,7 +64,6 @@ class AutoCommands:
                                        f"{member.guild.system_channel}. Enjoy your stay with us.")
             await member.send(embed=info_embed)
 
-
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         """
@@ -82,4 +81,3 @@ class AutoCommands:
                                        f" we would encourage you to check your personal wallet so Bismuth is not left "
                                        f"behind.")
             await member.send(embed=info_embed)
-
