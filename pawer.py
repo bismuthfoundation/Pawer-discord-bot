@@ -15,6 +15,7 @@ from cogs.extra import Extra
 from cogs.hypernodes import Hypernodes
 from cogs.dragginator import Dragginator
 from cogs.autogame import Autogame
+from cogs.autoHandlers import AutoCommands
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 from modules.helpers import User
 from discord.ext.tasks import loop
@@ -235,14 +236,16 @@ async def ban_scammers():
 if __name__ == '__main__':
     hypernodes = Hypernodes(bot)
     bot.add_cog(hypernodes)
-
     dragg = Dragginator(bot)
+
     bot.add_cog(dragg)
 
     bot.add_cog(Extra(bot))
     bot.add_cog(Bismuth(bot))
     bot.add_cog(Token())
     bot.add_cog(Autogame())
+    bot.add_cog(AutoCommands(bot))
+
 
     background_cog_list = [hypernodes, dragg]
     background_task.start()
