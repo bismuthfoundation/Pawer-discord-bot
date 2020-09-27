@@ -131,7 +131,7 @@ async def about(ctx):
     # other stats frm the bot (sqlite base?)
     await ctx.send(
         "Pawer bot Version {}\nI'm your Bismuth butler. Type `Pawer help` for a full commands list.".format(
-            __version__))
+            __version__), delete_after=60)
 
 
 @loop(seconds=60)
