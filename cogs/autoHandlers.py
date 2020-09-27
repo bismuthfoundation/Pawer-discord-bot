@@ -6,6 +6,7 @@ import os
 import sys
 
 from discord.ext import commands
+from discord import Embed, Colour
 from modules.config import CONFIG, EMOJIS, SHORTCUTS
 
 
@@ -42,3 +43,25 @@ class AutoCommands:
 
         else:
             await self.system_message(ctx=ctx, error=error, destination=1, handled=True)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        """
+        When member joins a message will be sent to newly joined user
+        :param member:
+        :return:
+        """
+        if not member.bot:
+            info_embed = Embed(title=f'__Welcome to {member.guild}__',
+                               description=f'This is an automated system message from the f{self.bot.user}',
+                               colour=Colour.magenta())
+            info_embed.set_thumbnail(url=self.bot.user.avatar_url)
+            info_embed.add_field(name='Bismuth Butler at your service!',
+                                 value=f"I'm your Bismuth butler. Type `Pawer help` for a full commands list. Otherwise"
+                                       f" ***__{member.guild}__*** has {len(member.guild.channels)} channels "
+                                       f"available to {len(member.guild.members)}. Owner is {member.guild.owner} "
+                                       f"(id:{member.guild.owner.id}) and system channel is "
+                                       f"{member.guild.system_channel}. Enjoy your stay with us.")
+            await member.send(embed=info_embed)
+
+
