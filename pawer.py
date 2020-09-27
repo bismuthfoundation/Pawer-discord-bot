@@ -169,6 +169,8 @@ async def monitor_impersonators():
 
 async def ban_impersonators(notified_impersonators):
     global CHECKING_BANS
+    imp_channel = bot.get_channel(id=int(CONFIG['impersonator_info_channel']))
+
     if CHECKING_BANS:
         # Avoid re-entrance.
         return
@@ -181,12 +183,13 @@ async def ban_impersonators(notified_impersonators):
         print("{} members, {} impersonators, {} sec". format(len(members), len(impersonators), time() - start))
         for impersonator in impersonators:
             if impersonator.name not in notified_impersonators:
-                await bot.send_message(bot.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " found")
+                imp_channel = bot.get_channel(id=int(CONFIG['impersonator_info_channel']))
+                await imp_channel(content="Impersonator - " + impersonator.mention + " found")
                 print('Impersonator - {} found - Out of {} Total members'.format(impersonator.name, len(members)))
                 notified_impersonators.append(impersonator.name)
             if CONFIG['ban_impersonator']:
-                await bot.ban(impersonator)
-                await bot.send_message(bot.get_channel(CONFIG['impersonator_info_channel']), "Impersonator - " + impersonator.mention + " banned")
+                await impersonator.ban(reason="Impersonating")
+                await imp_channel.send(content="Impersonator - " + impersonator.mention + " banned")
                 print('Impersonator - {} banned'.format(impersonator.name))
     except Exception as e:
         print("Exception ban_impersonators", str(e))
@@ -209,6 +212,7 @@ def is_scammer(member):
 
 async def ban_scammers():
     global CHECKING_BANS
+    imp_channel = bot.get_channel(id=int(CONFIG['impersonator_info_channel']))
     if CHECKING_BANS:
         # Avoid re-entrance.
         return
@@ -223,8 +227,8 @@ async def ban_scammers():
         scammers = [member for member in members if is_scammer(member)]
         print("{} scammers". format(len(scammers)))
         for scammer in scammers:
-            await bot.send_message(bot.get_channel(CONFIG['impersonator_info_channel']), "Scammer - " + scammer.mention + " banned")
-            await bot.ban(scammer)
+            await imp_channel.send(content= "Scammer - " + scammer.mention + " banned")
+            await scammer.ban(reason='Scammer banned')
             print('Scammer - {} banned'.format(scammer.name))
 
     except Exception as e:
