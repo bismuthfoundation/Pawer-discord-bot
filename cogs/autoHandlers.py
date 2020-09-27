@@ -65,3 +65,21 @@ class AutoCommands:
             await member.send(embed=info_embed)
 
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        """
+        Clean up process once member leaves the guild
+        """
+
+        if not member.bot:
+            info_embed = Embed(title=f':warning: __Important Notice!__:warning: ',
+                               description=f'This is an automated system message from the f{self.bot.user}',
+                               colour=Colour.magenta())
+            info_embed.set_thumbnail(url=self.bot.user.avatar_url)
+            info_embed.add_field(name='Bismuth Butler message!',
+                                 value=f"To bad you are living us. We would just like to remind you that, Prawer"
+                                       f" allows to move Bismuth crypto currency in P2P transactions. Since you left us,"
+                                       f" we would encourage you to check your personal wallet so Bismuth is not left "
+                                       f"behind.")
+            await member.send(embed=info_embed)
+
