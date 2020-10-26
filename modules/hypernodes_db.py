@@ -2,15 +2,10 @@ import sqlite3
 import time
 import os
 from discord.utils import get
+from modules.helpers import safe_send_message
 
 
 class HypernodesDb:
-    async def safe_send_message(self, recipient, message, bot):
-        try:
-            await bot.send_message(recipient, message)
-        except Exception as e:
-            print(e)
-
     def __init__(self, db_path="data/hypernodes.db"):
         os.makedirs("data", exist_ok=True)
         
@@ -49,8 +44,8 @@ class HypernodesDb:
         ip_list = "("
         for node in removed_nodes:
             member = get(bot.get_all_members(), id=node[0])
-            await self.safe_send_message(member, "hypernode {} has been removed from the watch list because it don't "
-                                                 "exists anymore.".format(node[1]), bot)
+            await safe_send_message(member, "hypernode {} has been removed from the watch list because it don't "
+                                                 "exists anymore.".format(node[1]))
             ip_list += "'{}',".format(node[1])
         if removed_nodes:
             ip_list = ip_list[:-1]
@@ -79,8 +74,8 @@ class HypernodesDb:
         stopped_nodes = self.cursor.fetchall()
         for node in stopped_nodes:
             member = get(bot.get_all_members(), id=node[0])
-            await self.safe_send_message(member, "hypernode {} ({}) just stopped, you should check what happened"
-                                         .format(node[1], node[2]).replace(" () ", " "), bot)
+            await safe_send_message(member, "hypernode {} ({}) just stopped, you should check what happened"
+                                         .format(node[1], node[2]).replace(" () ", " "))
 
     def get_list(self, user_id):
         self.cursor.execute("SELECT distinct(ip), description FROM users_info WHERE user_id=?", (user_id,))
