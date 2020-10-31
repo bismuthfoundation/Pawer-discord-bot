@@ -137,7 +137,7 @@ async def about(ctx):
             __version__))
 
 
-@loop(seconds=1)
+@loop(seconds=60)
 async def background_task():
     for cog in background_cog_list:
         try:
