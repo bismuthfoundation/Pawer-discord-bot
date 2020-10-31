@@ -43,7 +43,7 @@ class HypernodesDb:
         removed_nodes = self.cursor.fetchall()
         ip_list = "("
         for node in removed_nodes:
-            member = get(bot.get_all_members(), id=node[0])
+            member = get(bot.get_all_members(), id=int(node[0]))
             await safe_send_message(member, "hypernode {} has been removed from the watch list because it don't "
                                                  "exists anymore.".format(node[1]))
             ip_list += "'{}',".format(node[1])
@@ -73,9 +73,10 @@ class HypernodesDb:
                             " users_info.ip=nodes_info.ip and status=1110")
         stopped_nodes = self.cursor.fetchall()
         for node in stopped_nodes:
-            member = get(bot.get_all_members(), id=node[0])
-            await safe_send_message(member, "hypernode {} ({}) just stopped, you should check what happened"
-                                         .format(node[1], node[2]).replace(" () ", " "))
+            member = get(bot.get_all_members(), id=int(node[0]))
+            if member:
+                await safe_send_message(member, "hypernode {} ({}) just stopped, you should check what happened"
+                                             .format(node[1], node[2]).replace(" () ", " "))
 
     def get_list(self, user_id):
         self.cursor.execute("SELECT distinct(ip), description FROM users_info WHERE user_id=?", (user_id,))

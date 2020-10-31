@@ -24,7 +24,11 @@ __version__ = '0.65'
 # BOT_PREFIX = ('Pawer ', 'pawer ')  # Edit on_message before
 BOT_PREFIX = 'Pawer '
 
-bot = commands.Bot(command_prefix=BOT_PREFIX)
+intents = discord.Intents.default()
+intents.members = True
+intents.presences = True
+
+bot = commands.Bot(command_prefix=BOT_PREFIX, intents=intents)
 
 CHECKING_BANS = False
 
@@ -133,7 +137,7 @@ async def about(ctx):
             __version__))
 
 
-@loop(seconds=60)
+@loop(seconds=1)
 async def background_task():
     for cog in background_cog_list:
         try:
