@@ -71,10 +71,11 @@ async def on_message(message):
         # swap 'help' and 'command' accordingly
         message.content = re.sub(r'(%s)(.*)(%s)' % ('Pawer', ' help'), r'\1\3\2', message.content)
 
-    if message.content.startswith('Pawer tip'):
-        #  Exception
-        await bot.process_commands(message)
-        return
+    for start in ['Pawer tip', 'Pawer token']:
+        if message.content.startswith(start):
+            #  Exception
+            await bot.process_commands(message)
+            return
 
     if type(message.channel) == discord.TextChannel and message.channel.id not in CONFIG['bot_channel']:
         # TODO: blame if Pawer command in non private nor dedicated channel

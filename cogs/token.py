@@ -99,9 +99,14 @@ class Token(commands.Cog):
             await ctx.message.add_reaction('👎')  # Thumb down
 
     @token.command()
+    async def snowball(self, ctx, recipient: Union[discord.User, str]):
+        await self.send(ctx, recipient, "snowball", 1)
+
+    @token.command()
     async def send(self, ctx, recipient: Union[discord.User, str], token: str, amount: int, *message):
         """Sends tokens to the given recipient, recipient can be a @discord_user or a bismuth address"""
         try:
+            print("sending {} {} from {} to {}".format(amount, token, ctx.author, recipient))
             user, user_info = await Bismuth.get_user_info(ctx)
             if user_info is None:
                 return
@@ -111,10 +116,8 @@ class Token(commands.Cog):
                 return
 
             address = recipient
-            print(recipient, type(recipient))
             if type(recipient) == discord.user.User:
                 recipient_user, recipient_user_info = await Bismuth.get_user_info(ctx, user_id=recipient.id, send_message=False)
-                print(recipient_user, recipient_user_info)
                 if recipient_user_info is None:
                     await ctx.message.add_reaction('😟')
                     await ctx.send("Recipient user doesn't have a pawer address")
@@ -131,13 +134,13 @@ class Token(commands.Cog):
             for balance in balances:
                 if balance[0] == token:
                     if balance[1] < amount:
-                        ctx.send("You only have {} {}".format(balance[1], balance[0]))
+                        await ctx.send("You only have {} {}".format(balance[1], balance[0]))
                         return
 
                     await Bismuth.operation(ctx, "token:transfer", address, "0", "{}:{}{}".format(token, amount, ":{}".format(" ".join(message)) if message else ""))
                     break
             else:
-                ctx.send("You don't own any {}".format(token))
+                await ctx.send("You don't own any {}".format(token))
 
         except Exception as e:
             print(str(e))
