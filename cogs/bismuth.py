@@ -406,7 +406,7 @@ class Bismuth(commands.Cog):
                     # answer by reaction not to pollute
                     await ctx.message.add_reaction('👍')  # Thumb up
                     await ctx.send("Your bet has been placed. Txid is {}".format(txid))
-                    await self.bot.remove_reaction(ctx.message, '⏳', self.bot.user)
+                    await ctx.message.remove_reaction('⏳', self.bot.user)
                     await self.get_zirco_status(ctx.author, txid)
                 else:
                     await ctx.message.add_reaction('👎')  # Thumb down
