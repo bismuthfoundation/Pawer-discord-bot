@@ -13,7 +13,7 @@ from modules.helpers import User, async_get, safe_send_message
 from cogs.bismuth import get_users_from_addresses
 from random import shuffle
 # Current Draggon Egg price in BIS
-EGG_PRICE = 3
+EGG_PRICE = 5
 
 DISCLAIMER = """By creating a Bismuth address on this service, you acknowledge that:
 - This is meant to be used for tips, thanks you, quick experiments and other small amount usage.
