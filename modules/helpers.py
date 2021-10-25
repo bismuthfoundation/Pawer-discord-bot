@@ -157,7 +157,7 @@ class User:
             if check_balance:
                 balance = BISMUTH_CLIENT.balance(for_display=False)
                 fees = BismuthUtil.fee_for_tx(data)
-                if float(balance) < float(amount) + fees:
+                if float(balance) < float(amount) + float(fees):
                     # TODO: better use an enum
                     error = 'LOW_BALANCE'
                     return {'txid': txid, 'error': error}
